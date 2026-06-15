@@ -1,0 +1,8 @@
+node_modules/
+.env
+uploads/
+saved_analysis/
+saved_text_intakes/
+saved_transcripts/
+saved_voice_notes/
+*.log

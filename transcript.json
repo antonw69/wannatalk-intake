@@ -1,0 +1,8 @@
+{
+  "error": {
+    "message": "Total number of tokens in instructions + audio is too large for this model",
+    "type": "invalid_request_error",
+    "param": null,
+    "code": "input_too_large"
+  }
+}

@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WannaTalk Intake</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --primary: #2CCB67;
+            --primary-dark: #1B8E48;
+            --primary-soft: #EAF8EF;
+            --primary-light: #F4FBF6;
+            --white: #FFFFFF;
+            --background: #F6FAF7;
+            --text: #173326;
+            --body-text: #334155;
+            --muted: #6B7280;
+            --border: #DCEFE3;
+            --danger: #B42318;
+            --shadow: 0 22px 55px rgba(15, 23, 42, 0.09);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: radial-gradient(circle at top left, rgba(44, 203, 103, 0.18), transparent 34%), linear-gradient(180deg, #FFFFFF 0%, var(--background) 45%, #EFF8F2 100%);
+            color: var(--body-text);
+            min-height: 100vh;
+            padding: 22px;
+        }
+
+        .page-shell {
+            width: 100%;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .intake-card {
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .hero {
+            padding: 34px 30px 26px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(244,251,246,0.96));
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: block;
+            width: 260px;
+            max-width: 78%;
+            margin: 0 auto 18px;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            color: var(--text);
+            font-size: clamp(32px, 5vw, 48px);
+            line-height: 1.08;
+            letter-spacing: -0.04em;
+        }
+
+        .intro {
+            max-width: 700px;
+            margin: 0 auto;
+            color: #496357;
+            line-height: 1.72;
+            font-size: 16px;
+        }
+
+        .trust-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            padding: 22px 30px 0;
+        }
+
+        .trust-item {
+            background: var(--primary-light);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px 14px;
+            text-align: center;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .form-area {
+            padding: 28px 30px 34px;
+        }
+
+        .section {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 22px;
+            margin-bottom: 18px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            padding: 15px 16px;
+            border-radius: 16px;
+            border: 1px solid #D1D5DB;
+            background: #FFFFFF;
+            color: var(--body-text);
+            margin-bottom: 14px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+            input[type="text"]:focus,
+            input[type="tel"]:focus,
+            textarea:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 4px rgba(44, 203, 103, 0.15);
+            }
+
+        textarea {
+            min-height: 180px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.55;
+            color: var(--body-text);
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            accent-color: var(--primary);
+            margin-right: 8px;
+        }
+
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mode-btn {
+            padding: 15px;
+            border-radius: 999px;
+            border: 2px solid var(--primary);
+            background: #FFFFFF;
+            color: var(--primary-dark);
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 15px;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+            .mode-btn:hover {
+                transform: translateY(-1px);
+            }
+
+            .mode-btn.active {
+                background: var(--primary);
+                color: #FFFFFF;
+                box-shadow: 0 10px 22px rgba(44, 203, 103, 0.22);
+            }
+
+        .notice {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+            background: #FFF7ED;
+            border: 1px solid #FED7AA;
+            border-radius: 14px;
+            padding: 13px 14px;
+            margin-top: 12px;
+        }
+
+        .recorder-panel {
+            text-align: center;
+            background: linear-gradient(180deg, #F8FCF9, #EEF8F2);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 26px 20px;
+            margin-bottom: 14px;
+        }
+
+        .mic-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 12px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+            font-size: 34px;
+            border: 1px solid var(--border);
+        }
+
+        .recorder-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .recorder-subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 44px;
+            color: var(--primary-dark);
+            font-weight: 900;
+            margin: 12px 0 4px;
+            letter-spacing: -0.03em;
+        }
+
+        .main-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 999px;
+            background: var(--primary);
+            color: #FFFFFF;
+            font-weight: 900;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 15px;
+            box-shadow: 0 14px 28px rgba(44, 203, 103, 0.24);
+        }
+
+        .secondary-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 999px;
+            border: 2px solid var(--primary);
+            background: #FFFFFF;
+            color: var(--primary-dark);
+            font-weight: 900;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 15px;
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 15px;
+            color: var(--primary-dark);
+            font-weight: 900;
+            background: var(--primary-soft);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 12px 16px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+            .footer strong {
+                color: var(--text);
+            }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .hero {
+                padding: 26px 18px 22px;
+            }
+
+            .form-area {
+                padding: 20px 16px 26px;
+            }
+
+            .trust-grid {
+                grid-template-columns: 1fr;
+                padding: 18px 16px 0;
+            }
+
+            .mode-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 18px;
+                border-radius: 18px;
+            }
+
+            .logo {
+                width: 220px;
+            }
+
+            .timer {
+                font-size: 38px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page-shell">
+        <div class="intake-card">
+
+            <div class="hero">
+                <img src="wannatalk logo.png" class="logo" alt="WannaTalk Logo">
+
+                <h1>You're Not Alone</h1>
+
+                <div class="intro">
+                    WannaTalk provides a safe and confidential way to share what you're going through.
+                    A trained professional will review your information and help guide the next steps.
+                    Share only what you feel comfortable sharing.
+                </div>
+            </div>
+
+            <div class="trust-grid">
+                <div class="trust-item">🔒 Secure & Confidential</div>
+                <div class="trust-item">👩‍⚕️ Professionally Reviewed</div>
+                <div class="trust-item">💚 Support Starts With A Conversation</div>
+            </div>
+
+            <div class="form-area">
+
+                <div class="section">
+                    <div class="section-title">
+                        <span class="step-badge">1</span>
+                        Tell Us About Yourself
+                    </div>
+                    <input type="text" id="fullName" placeholder="Name and Surname">
+                    <input type="tel" id="contactNumber" placeholder="Contact Number">
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <span class="step-badge">2</span>
+                        Choose How You Would Like To Talk
+                    </div>
+                    <div class="mode-buttons">
+                        <button id="voiceModeBtn" class="mode-btn active">Record Voice Note</button>
+                        <button id="textModeBtn" class="mode-btn">Type Message</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <span class="step-badge">3</span>
+                        Preferred Language
+                    </div>
+                    <label><input type="radio" name="language" value="en" checked> English</label>
+                    <label><input type="radio" name="language" value="af"> Afrikaans</label>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">
+                        <span class="step-badge">4</span>
+                        Consent & Safety Notice
+                    </div>
+
+                    <label>
+                        <input type="checkbox" id="consent">
+                        I consent to WannaTalk recording, transcribing and securely storing this intake.
+                    </label>
+
+                    <label>
+                        <input type="checkbox" id="shareLocation">
+                        I consent to sharing my location for nearby support suggestions.
+                    </label>
+
+                    <div class="notice">
+                        This is not an emergency service. If you are in immediate danger, please contact emergency services immediately.
+                    </div>
+                </div>
+
+                <div id="voiceMode">
+                    <div class="recorder-panel">
+                        <div class="mic-icon">🎤</div>
+                        <div class="recorder-title">Share your story using a voice note</div>
+                        <div class="recorder-subtitle">Maximum recording time: 2 minutes</div>
+                        <div class="timer" id="timer">02:00</div>
+                    </div>
+
+                    <button id="startBtn" class="main-btn">Start Recording</button>
+                    <button id="stopBtn" class="secondary-btn" disabled>Stop Recording</button>
+                </div>
+
+                <div id="textMode" style="display:none;">
+                    <textarea id="typedMessage" placeholder="Tell us what you are going through. Share only what you feel comfortable sharing."></textarea>
+                    <button id="submitTextBtn" class="main-btn">Submit Message</button>
+                </div>
+
+                <div class="status" id="status">Ready</div>
+
+                <div class="footer">
+                    <strong>WannaTalk</strong><br>
+                    Secure Mental Wellness Intake Platform<br>
+                    © WannaTalk 2026
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>let mediaRecorder;
+        let audioChunks = [];
+        let stream;
+        let countdownTimer;
+        let recordingTimer;
+
+        const MAX_SECONDS = 120;
+
+        const voiceModeBtn = document.getElementById("voiceModeBtn");
+        const textModeBtn = document.getElementById("textModeBtn");
+        const voiceMode = document.getElementById("voiceMode");
+        const textMode = document.getElementById("textMode");
+        const startBtn = document.getElementById("startBtn");
+        const stopBtn = document.getElementById("stopBtn");
+        const submitTextBtn = document.getElementById("submitTextBtn");
+        const timer = document.getElementById("timer");
+        const statusText = document.getElementById("status");
+
+        let secondsLeft = MAX_SECONDS;
+
+        function updateTimer() {
+            const mins = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+            const secs = String(secondsLeft % 60).padStart(2, "0");
+            timer.innerText = `${mins}:${secs}`;
+        }
+
+        function selectedLanguage() {
+            return document.querySelector('input[name="language"]:checked').value;
+        }
+
+        async function getLocationData() {
+            return new Promise((resolve) => {
+                const shareLocation = document.getElementById("shareLocation");
+
+                if (!shareLocation.checked || !navigator.geolocation) {
+                    resolve(null);
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    pos => resolve({
+                        latitude: pos.coords.latitude,
+                        longitude: pos.coords.longitude,
+                        accuracy: pos.coords.accuracy
+                    }),
+                    () => resolve(null),
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            });
+        }
+
+        voiceModeBtn.onclick = () => {
+            voiceMode.style.display = "block";
+            textMode.style.display = "none";
+            voiceModeBtn.classList.add("active");
+            textModeBtn.classList.remove("active");
+        };
+
+        textModeBtn.onclick = () => {
+            voiceMode.style.display = "none";
+            textMode.style.display = "block";
+            textModeBtn.classList.add("active");
+            voiceModeBtn.classList.remove("active");
+        };
+
+        function stopRecording() {
+            clearInterval(countdownTimer);
+            clearTimeout(recordingTimer);
+
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        startBtn.onclick = async () => {
+            const consent = document.getElementById("consent");
+
+            if (!consent.checked) {
+                alert("Please accept consent first.");
+                return;
+            }
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                let mimeType = "";
+
+                if (MediaRecorder.isTypeSupported("audio/mp4")) {
+                    mimeType = "audio/mp4";
+                } else if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+                    mimeType = "audio/webm;codecs=opus";
+                } else if (MediaRecorder.isTypeSupported("audio/webm")) {
+                    mimeType = "audio/webm";
+                }
+
+                mediaRecorder = mimeType
+                    ? new MediaRecorder(stream, { mimeType })
+                    : new MediaRecorder(stream);
+
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstart = () => {
+                    statusText.innerText = "Recording...";
+                    secondsLeft = MAX_SECONDS;
+                    updateTimer();
+
+                    countdownTimer = setInterval(() => {
+                        secondsLeft--;
+                        updateTimer();
+                        if (secondsLeft <= 0) stopRecording();
+                    }, 1000);
+
+                    recordingTimer = setTimeout(() => {
+                        stopRecording();
+                    }, MAX_SECONDS * 1000);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    try {
+                        statusText.innerText = "Saving voice note...";
+
+                        const actualMimeType = mediaRecorder.mimeType || "audio/webm";
+                        const extension = actualMimeType.includes("mp4") ? "m4a" : "webm";
+
+                        const audioBlob = new Blob(audioChunks, { type: actualMimeType });
+
+                        const formData = new FormData();
+                        formData.append("audio", audioBlob, `voice.${extension}`);
+                        formData.append("language", selectedLanguage());
+                        formData.append("name_and_surname", document.getElementById("fullName").value);
+                        formData.append("contact_number", document.getElementById("contactNumber").value);
+
+                        const location = await getLocationData();
+
+                        if (location) {
+                            formData.append("latitude", location.latitude);
+                            formData.append("longitude", location.longitude);
+                            formData.append("accuracy", location.accuracy);
+                        }
+
+                        const response = await fetch("/transcribe", {
+                            method: "POST",
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            statusText.innerText = "Thank you. Your message has been received.";
+                        } else {
+                            statusText.innerText = result.error || "Something went wrong.";
+                        }
+
+                    } catch (err) {
+                        console.error(err);
+                        statusText.innerText = "Voice note upload failed.";
+                    } finally {
+                        if (stream) stream.getTracks().forEach(track => track.stop());
+                        secondsLeft = MAX_SECONDS;
+                        updateTimer();
+                    }
+                };
+
+                mediaRecorder.start();
+
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+
+            } catch (err) {
+                console.error(err);
+                alert("Microphone access failed.");
+            }
+        };
+
+        stopBtn.onclick = () => {
+            stopRecording();
+        };
+
+        submitTextBtn.onclick = async () => {
+            const consent = document.getElementById("consent");
+
+            if (!consent.checked) {
+                alert("Please accept consent first.");
+                return;
+            }
+
+            const typedMessage = document.getElementById("typedMessage").value;
+
+            if (!typedMessage.trim()) {
+                alert("Please type a message.");
+                return;
+            }
+
+            statusText.innerText = "Saving message...";
+
+            const payload = {
+                text: typedMessage,
+                language: selectedLanguage(),
+                name_and_surname: document.getElementById("fullName").value,
+                contact_number: document.getElementById("contactNumber").value
+            };
+
+            const location = await getLocationData();
+
+            if (location) {
+                payload.latitude = location.latitude;
+                payload.longitude = location.longitude;
+                payload.accuracy = location.accuracy;
+            }
+
+            try {
+                const response = await fetch("/save-text-intake", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById("typedMessage").value = "";
+                    statusText.innerText = "Thank you. Your message has been received.";
+                } else {
+                    statusText.innerText = result.error || "Something went wrong.";
+                }
+
+            } catch (err) {
+                console.error(err);
+                statusText.innerText = "Message submission failed.";
+            }
+        };
+
+        updateTimer();</script>
+
+</body>
+</html>

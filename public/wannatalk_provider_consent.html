@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        WannaTalk Provider Registration and Consent
+    </title>
+
+    <style>
+        :root {
+            --primary: #0f4c5c;
+            --primary-dark: #0b3b48;
+            --bg: #f4f6f8;
+            --text: #1f2937;
+            --muted: #64748b;
+            --border: #dbe7e5;
+            --danger: #b91c1c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: var(--text);
+            line-height: 1.65;
+        }
+
+        .page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 32px 18px 60px;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 34px 34px 26px;
+            background: linear-gradient( 135deg, #eef7f9 0%, #ffffff 58% );
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            color: var(--primary-dark);
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(15,76,92,0.20);
+        }
+
+        h1 {
+            font-size: 30px;
+            line-height: 1.2;
+            margin: 0 0 10px;
+            color: #0f172a;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin: 4px 0 0;
+            color: var(--primary-dark);
+        }
+
+        h3 {
+            font-size: 20px;
+            margin-top: 34px;
+            margin-bottom: 10px;
+            color: #0f172a;
+            border-top: 1px solid #edf2f7;
+            padding-top: 24px;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 16px;
+        }
+
+        .notice {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-left: 5px solid #0f4c5c;
+            background: #eef7f9;
+            border-radius: 12px;
+            color: #0f4c5c;
+            font-size: 14px;
+        }
+
+        .terms-box {
+            max-height: 68vh;
+            overflow-y: auto;
+            padding: 30px 34px;
+            scroll-behavior: smooth;
+        }
+
+        ul {
+            margin-top: 8px;
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+
+        li {
+            margin: 6px 0;
+        }
+
+        .provider-declaration {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 20px;
+        }
+
+        .acknowledgement {
+            padding: 26px 34px;
+            border-top: 1px solid var(--border);
+            background: #fbfefd;
+            position: sticky;
+            bottom: 0;
+            z-index: 3;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            border-radius: 16px;
+        }
+
+            .checkbox-row input {
+                width: 22px;
+                height: 22px;
+                margin-top: 2px;
+                accent-color: var(--primary-dark);
+                flex: 0 0 auto;
+            }
+
+            .checkbox-row label {
+                font-weight: 700;
+                color: #0f172a;
+            }
+
+        .small {
+            display: block;
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 999px;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .submit-btn {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(15,76,92,0.22);
+        }
+
+            .submit-btn:hover:not(:disabled) {
+                background: var(--primary-dark);
+                transform: translateY(-1px);
+            }
+
+            .submit-btn:disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
+                box-shadow: none;
+            }
+
+        .print-btn {
+            background: #eef2f7;
+            color: #334155;
+        }
+
+        .status {
+            font-size: 14px;
+            color: #b91c1c;
+            margin-left: 4px;
+        }
+
+        .success {
+            color: #047857;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="page">
+
+        <form id="consentForm"
+              class="card"
+              method="POST"
+              action="/api/provider-consent">
+
+            <section class="header">
+
+                <div class="brand">
+                    <span class="brand-mark">W</span>
+                    <span>WannaTalk</span>
+                </div>
+
+                <div class="notice">
+                    Please read the full Provider Registration,
+                    Professional Conduct,
+                    POPIA,
+                    AI Processing,
+                    Recording,
+                    Transcription,
+                    WhatsApp,
+                    SMS,
+                    Email and Telehealth Terms
+                    before accepting.
+                </div>
+
+            </section>
+
+            <section class="terms-box" id="termsBox">
+                <h1>WANNATALK PROVIDER REGISTRATION, PROFESSIONAL CONDUCT, POPIA, AI PROCESSING, RECORDING, TRANSCRIPTION AND TELEHEALTH TERMS</h1>
+
+                <h2>REPUBLIC OF SOUTH AFRICA</h2>
+
+                <p class="subtitle">
+                    APPLICABLE TO ALL FACILITATORS, COUNSELLORS, COACHES, MENTORS, WELLNESS PRACTITIONERS, SOCIAL WORKERS, HEALTHCARE PRACTITIONERS, PSYCHOLOGISTS, PSYCHIATRISTS, NGO SERVICE PROVIDERS AND OTHER APPROVED PROVIDERS UTILISING THE WANNATALK PLATFORM
+                </p>
+
+                <h3>1. INTRODUCTION</h3>
+
+                <p>This Provider Registration, Professional Conduct, POPIA, AI Processing, Recording, Transcription and Telehealth Agreement ("Agreement") governs the registration, onboarding, verification, participation, communication, consultation, scheduling, administration, operation, use of, and provision of services through the WannaTalk platform, systems, software applications, mobile applications, websites, communication systems, scheduling systems, consultation systems, telehealth systems, artificial intelligence systems, onboarding systems, APIs, databases and all associated services operated by or on behalf of WannaTalk.</p>
+
+                <p>By registering as a Provider, creating an account, submitting information, participating in onboarding activities, accepting Users, conducting consultations, communicating through the Platform, uploading information, utilising Platform services, receiving referrals, or otherwise participating in the Platform ecosystem, the Provider expressly acknowledges that the Provider has read, understood and agrees to be legally bound by all provisions contained in this Agreement.</p>
+
+                <p>This Agreement constitutes a legally binding agreement between the Provider and WannaTalk.</p>
+
+                <p>If the Provider does not agree to these Terms, registration may not proceed and the Provider must immediately discontinue use of the Platform.</p>
+
+                <h3>2. DEFINITIONS</h3>
+
+                <p><strong>Platform</strong> means all WannaTalk systems, software, websites, mobile applications, communication systems, onboarding systems, consultation systems, APIs, cloud services, AI services, databases and infrastructure.</p>
+
+                <p><strong>Provider</strong> means any person or organisation approved to provide services through the Platform.</p>
+
+                <p><strong>Healthcare Practitioner</strong> means a practitioner registered with the Health Professions Council of South Africa (HPCSA) or another recognised South African regulatory authority.</p>
+
+                <p><strong>Facilitator</strong> means a non-HPCSA registered mentor, coach, counsellor, peer support provider, wellness facilitator, life coach or support professional operating within their lawful scope.</p>
+
+                <p><strong>User</strong> means any patient, client, participant, member or person utilising the Platform.</p>
+
+                <p><strong>Special Personal Information</strong> shall have the meaning assigned by the Protection of Personal Information Act 4 of 2013 (POPIA).</p>
+
+                <p><strong>AI Services</strong> includes speech recognition, transcription, summarisation, categorisation, sentiment analysis, machine learning, automation, workflow management and associated technologies.</p>
+
+                <p><strong>Consultation</strong> includes video consultations, voice consultations, telephonic consultations, chat consultations, messaging consultations, coaching sessions, counselling sessions, mentoring sessions, wellness sessions and onboarding interactions.</p>
+
+                <h3>3. NATURE OF THE PLATFORM</h3>
+
+                <p>WannaTalk operates as a technology-enabled wellness, telehealth, communication and consultation management platform.</p>
+
+                <p>WannaTalk facilitates communication, scheduling, onboarding, workflow management, consultation management, AI-assisted processing, administration and associated technology services.</p>
+
+                <p>WannaTalk does not itself provide healthcare, psychiatric, psychological, counselling, coaching or wellness services unless expressly stated otherwise.</p>
+
+                <p>The Provider acknowledges that all professional services rendered through the Platform are rendered independently by the Provider.</p>
+
+                <p>The Provider acknowledges that no employment relationship, partnership, agency relationship, joint venture, franchise relationship or shareholder relationship is created between WannaTalk and the Provider.</p>
+
+                <p>The Provider remains solely responsible for all professional advice, recommendations, assessments, interventions, referrals, communications and consultation outcomes.</p>
+
+                <h3>4. APPLICABLE SOUTH AFRICAN LEGISLATION</h3>
+
+                <p>This Agreement shall be governed by the laws of the Republic of South Africa.</p>
+
+                <p>The Platform operates subject to applicable legislation including but not limited to:</p>
+
+                <ul>
+                    <li>Protection of Personal Information Act 4 of 2013 (POPIA)</li>
+                    <li>Electronic Communications and Transactions Act 25 of 2002 (ECTA)</li>
+                    <li>National Health Act 61 of 2003</li>
+                    <li>Health Professions Act 56 of 1974</li>
+                    <li>HPCSA Ethical Rules</li>
+                    <li>HPCSA Telehealth Guidelines</li>
+                    <li>Consumer Protection Act 68 of 2008</li>
+                    <li>Cybercrimes Act 19 of 2020</li>
+                    <li>Medicines and Related Substances Act 101 of 1965</li>
+                    <li>Common law obligations relating to confidentiality, negligence and consent</li>
+                </ul>
+
+                <h3>5. PROVIDER ACKNOWLEDGEMENT AND GENERAL CONSENT</h3>
+
+                <p>The Provider expressly acknowledges and agrees that:</p>
+
+                <ul>
+                    <li>Registration is voluntary.</li>
+                    <li>The Provider participates at their own risk.</li>
+                    <li>The Provider remains responsible for professional decisions.</li>
+                    <li>The Provider consents to electronic communications.</li>
+                    <li>The Provider consents to digital onboarding.</li>
+                    <li>The Provider consents to AI-assisted processing.</li>
+                    <li>The Provider consents to electronic recordkeeping.</li>
+                    <li>The Provider understands the risks associated with telehealth and digital consultations.</li>
+                    <li>The Provider acknowledges that WannaTalk may rely upon information supplied by the Provider.</li>
+                </ul>
+
+                <p>The Provider further acknowledges that inaccurate information supplied during onboarding may result in suspension, restriction or termination of Platform access.</p>
+
+                <h3>6. PROVIDER VERIFICATION, CREDENTIALS AND REPRESENTATIONS</h3>
+
+                <p>The Provider warrants that all information supplied to WannaTalk is complete, true, accurate and current.</p>
+
+                <p>The Provider authorises WannaTalk to verify:</p>
+
+                <ul>
+                    <li>Identity documents</li>
+                    <li>Professional registrations</li>
+                    <li>HPCSA registrations</li>
+                    <li>Practice Numbers</li>
+                    <li>Qualifications</li>
+                    <li>Degrees</li>
+                    <li>Certifications</li>
+                    <li>Professional memberships</li>
+                    <li>Employment history</li>
+                    <li>References</li>
+                    <li>NGO affiliations</li>
+                    <li>Clinic affiliations</li>
+                    <li>Hospital affiliations</li>
+                    <li>Organisational affiliations</li>
+                </ul>
+
+                <p>The Provider agrees that WannaTalk may perform ongoing verification at any time.</p>
+
+                <p>The Provider agrees to immediately notify WannaTalk if:</p>
+
+                <ul>
+                    <li>A registration lapses</li>
+                    <li>A licence expires</li>
+                    <li>A disciplinary investigation commences</li>
+                    <li>A criminal investigation commences</li>
+                    <li>Professional standing changes</li>
+                    <li>Scope of practice changes</li>
+                </ul>
+
+                <p>The Provider acknowledges that WannaTalk may suspend access pending verification.</p>
+
+                <h3>7. PROFESSIONAL STATUS AND SCOPE OF PRACTICE</h3>
+
+                <p>Healthcare Practitioners remain solely responsible for compliance with professional obligations, HPCSA requirements and applicable legislation.</p>
+
+                <p>Facilitators acknowledge that they are not healthcare practitioners unless separately registered.</p>
+
+                <p>Facilitators expressly agree not to diagnose medical conditions, diagnose psychiatric conditions, prescribe medication, represent themselves as doctors, represent themselves as psychiatrists, represent themselves as psychologists where not qualified to do so, misrepresent qualifications or engage in unlawful healthcare activities.</p>
+
+                <p>All Providers agree to operate strictly within their lawful scope of practice.</p>
+
+                <h3>8. PROFESSIONAL CONDUCT AND ETHICAL OBLIGATIONS</h3>
+
+                <p>The Provider agrees to:</p>
+
+                <ul>
+                    <li>Treat Users with dignity and respect.</li>
+                    <li>Maintain confidentiality.</li>
+                    <li>Maintain professional boundaries.</li>
+                    <li>Avoid discrimination.</li>
+                    <li>Avoid harassment.</li>
+                    <li>Avoid exploitation.</li>
+                    <li>Avoid abusive conduct.</li>
+                    <li>Avoid conflicts of interest.</li>
+                    <li>Avoid inappropriate relationships with Users.</li>
+                    <li>Protect vulnerable persons.</li>
+                    <li>Comply with safeguarding obligations.</li>
+                    <li>Maintain professional integrity.</li>
+                </ul>
+
+                <p>The Provider agrees not to engage in conduct that may harm Users, WannaTalk, other Providers or the reputation of the Platform.</p>
+
+                <h3>9. TELEHEALTH RISKS AND LIMITATIONS</h3>
+
+                <p>The Provider acknowledges and accepts the inherent risks associated with telehealth including connectivity failures, platform outages, device failures, poor audio quality, poor video quality, delayed communications, data corruption, cybersecurity incidents, incomplete information, inability to perform physical examinations, delayed emergency interventions, miscommunication and misinterpretation of information.</p>
+
+                <p>The Provider agrees to exercise professional judgement regarding suitability of telehealth services.</p>
+
+                <h3>10. EMERGENCY RESPONSIBILITIES</h3>
+
+                <p>WannaTalk is not an emergency service.</p>
+
+                <p>The Provider agrees to take reasonable steps to escalate emergencies involving suicide risk, self-harm, violence, abuse, psychiatric emergencies, medical emergencies and safeguarding concerns.</p>
+
+                <p>The Provider acknowledges that emergency intervention may require referral to hospitals, emergency services, SAPS, crisis centres or other authorities.</p>
+                <h3>11. CONSENT TO AI PROCESSING</h3>
+
+                <p>The Provider expressly consents to the use of artificial intelligence systems, machine learning systems, speech recognition systems, transcription systems, summarisation systems, categorisation systems, language processing systems, automation systems, onboarding systems and analytical systems utilised by WannaTalk.</p>
+
+                <p>The Provider acknowledges that AI systems may process voice recordings, audio files, uploaded documents, onboarding questionnaires, chat conversations, WhatsApp messages, emails, consultation notes, transcripts, assessments, behavioural information, emotional indicators, metadata, scheduling information and communication records.</p>
+
+                <p>The Provider acknowledges that AI-generated outputs may include summaries, transcription, categorisation, language analysis, sentiment analysis, risk flagging, onboarding assistance, workflow automation and administrative assistance.</p>
+
+                <p>The Provider acknowledges that AI outputs may be inaccurate, incomplete, delayed, biased, inappropriate, misleading or incorrectly interpreted.</p>
+
+                <p>The Provider agrees that AI-generated outputs shall not replace professional judgement and that all clinical, counselling, coaching, mentoring or wellness decisions remain the responsibility of the Provider.</p>
+
+                <h3>12. CONSENT TO RECORDINGS AND TRANSCRIPTIONS</h3>
+
+                <p>The Provider expressly consents to voice recordings, onboarding recordings, consultation recordings, intake recordings, communication recordings and uploaded audio recordings being captured, stored, processed, analysed, transcribed, summarised, archived, reviewed, monitored and retained.</p>
+
+                <p>The Provider acknowledges that recordings may be utilised for onboarding, quality assurance, legal protection, compliance monitoring, auditing, continuity of care, supervision, training, operational support, dispute resolution and AI-assisted processing.</p>
+
+                <p>The Provider acknowledges that recordings may be processed by third-party cloud providers and AI providers approved by WannaTalk.</p>
+
+                <p>The Provider agrees that WannaTalk may retain recordings in accordance with legal, regulatory, operational and compliance requirements.</p>
+
+                <h3>13. WHATSAPP, SMS, EMAIL AND DIGITAL COMMUNICATIONS</h3>
+
+                <p>The Provider expressly consents to communications via WhatsApp, SMS, email, push notifications, AI-generated communications, digital notices, platform notifications and automated communication systems.</p>
+
+                <p>The Provider acknowledges that third-party messaging systems are outside the exclusive control of WannaTalk.</p>
+
+                <p>The Provider acknowledges that messages may be intercepted, devices may be compromised, accounts may be accessed by unauthorised persons, messages may fail to deliver and electronic communications are not completely secure.</p>
+
+                <p>The Provider acknowledges that WannaTalk shall not be liable for delayed messages, delivery failures, third-party messaging failures, communication outages, interception of communications or unauthorised device access.</p>
+
+                <h3>14. POPIA CONSENT</h3>
+
+                <p>The Provider expressly consents to the collection, storage, processing, retention, transfer, analysis, categorisation, sharing and lawful use of Personal Information and Special Personal Information.</p>
+
+                <p>The Provider acknowledges that Personal Information and Special Personal Information may include identity information, registration information, healthcare information, professional information, employment information, voice recordings, biometric information, communication records, onboarding information and associated metadata.</p>
+
+                <p>The Provider acknowledges that WannaTalk may process information for onboarding, verification, service delivery, compliance, legal obligations, quality assurance, AI processing, operational support, analytics, auditing, fraud prevention, cybersecurity and lawful business purposes.</p>
+
+                <h3>15. CROSS-BORDER DATA PROCESSING</h3>
+
+                <p>The Provider acknowledges that certain service providers, cloud providers, hosting providers, AI providers, analytics providers, communication providers and infrastructure providers may process information outside the Republic of South Africa.</p>
+
+                <p>The Provider expressly consents to cross-border processing and transfer of Personal Information where reasonably necessary for operation of the Platform.</p>
+
+                <p>WannaTalk shall take reasonable steps to ensure that such processing occurs in accordance with applicable legal requirements.</p>
+
+                <h3>16. RECORDS MANAGEMENT AND RETENTION</h3>
+
+                <p>The Provider acknowledges that consultation records, onboarding records, communications, recordings, assessments, reports, notes and operational records may be created, stored, archived, processed, analysed and retained.</p>
+
+                <p>The Provider acknowledges that records may be retained in accordance with legal obligations, regulatory obligations, professional guidelines, insurance requirements, operational requirements and lawful business requirements.</p>
+
+                <p>The Provider acknowledges that records may not be deleted immediately upon request where legal, operational or regulatory retention obligations apply.</p>
+
+                <h3>17. COMPLAINTS, AUDITS AND INVESTIGATIONS</h3>
+
+                <p>WannaTalk may investigate complaints, conduct audits and review communications, recordings, documentation, consultations and records where reasonably necessary.</p>
+
+                <p>The Provider agrees to cooperate fully with all audits, investigations, reviews and compliance assessments conducted by WannaTalk.</p>
+
+                <p>The Provider acknowledges that WannaTalk may request supporting documentation, qualifications, registrations, reports or other information relevant to an investigation.</p>
+
+                <p>The Provider acknowledges that failure to cooperate may result in suspension, restriction or termination of Platform access.</p>
+
+                <h3>18. PROVIDER RESPONSIBILITIES AND LIABILITY</h3>
+
+                <p>The Provider remains solely responsible for professional advice, recommendations, consultations, assessments, interventions, referrals, communications and outcomes arising from services rendered through the Platform.</p>
+
+                <p>The Provider acknowledges that WannaTalk acts solely as a technology platform and administrative facilitator.</p>
+
+                <p>WannaTalk shall not be responsible for professional services rendered by Providers or for decisions made by Providers in the course of service delivery.</p>
+
+                <p>The Provider accepts full responsibility for ensuring compliance with all professional, legal, ethical and regulatory obligations applicable to their services.</p>
+
+                <h3>19. PAYMENTS, FEES, COMMISSIONS AND PROVIDER COMPENSATION</h3>
+
+                <p>The Provider acknowledges that WannaTalk may facilitate appointment scheduling, consultation management, invoicing, payment collection, payment processing, subscription services, referral services, marketplace services and associated financial services.</p>
+
+                <p>The Provider acknowledges and agrees that WannaTalk may charge platform fees, subscription fees, transaction fees, referral fees, administration fees and agreed commissions.</p>
+
+                <p>The Provider acknowledges that payment processors and third-party service providers may deduct transaction fees and processing fees.</p>
+
+                <p>WannaTalk reserves the right to amend pricing structures, commission models, transaction fees, subscription fees and payout schedules upon reasonable notice.</p>
+
+                <p>The Provider acknowledges that WannaTalk may withhold payments where fraud, disputes, regulatory concerns, chargebacks, refunds, legal obligations or compliance concerns exist.</p>
+
+                <p>The Provider remains solely responsible for taxation obligations and financial reporting obligations.</p>
+
+                <h3>20. PROFESSIONAL INDEMNITY INSURANCE</h3>
+
+                <p>The Provider acknowledges that WannaTalk does not provide professional indemnity insurance, malpractice insurance, professional liability insurance or public liability insurance unless expressly agreed in writing.</p>
+
+                <p>The Provider acknowledges and agrees that they remain responsible for maintaining appropriate insurance cover where required by law, regulation, professional obligations or organisational policy.</p>
+
+                <p>WannaTalk may request proof of insurance cover at any time.</p>
+
+                <p>The Provider agrees to provide evidence of insurance upon reasonable request.</p>
+
+                <p>The Provider acknowledges that failure to maintain required insurance may result in suspension, restriction or removal from the Platform.</p>
+
+                <p>The Provider further acknowledges that WannaTalk shall not be liable for claims that would ordinarily be covered by professional indemnity insurance, malpractice insurance or professional liability insurance.</p>
+                <h3>21. CLINICAL GOVERNANCE, SUPERVISION, QUALITY ASSURANCE AND PLATFORM STANDARDS</h3>
+
+                <p>WannaTalk may implement clinical governance, quality assurance, supervision, auditing, monitoring, risk management, compliance management and service improvement programmes to maintain Platform standards.</p>
+
+                <p>The Provider acknowledges that WannaTalk may review consultations, records, communications, assessments, documentation and service delivery activities where reasonably necessary for quality assurance, compliance, supervision, governance, dispute resolution, training or operational purposes.</p>
+
+                <p>The Provider agrees to cooperate fully with quality assurance reviews, supervision activities, governance processes and corrective action plans.</p>
+
+                <p>WannaTalk reserves the right to impose additional standards, operational requirements, clinical governance requirements, compliance obligations and quality assurance measures from time to time.</p>
+
+                <h3>22. CONFIDENTIALITY, NON-CIRCUMVENTION AND NON-SOLICITATION</h3>
+
+                <p>The Provider acknowledges that, during participation on the WannaTalk Platform, the Provider may obtain access to confidential information, proprietary information, business information, user information, operational information, platform information, workflows, procedures, methodologies, forms, templates, onboarding processes, AI-assisted systems, questionnaires, assessments, communications and other information belonging to WannaTalk, its Users, its Providers or its business partners.</p>
+
+                <p>The Provider agrees to maintain strict confidentiality regarding all such information and shall not disclose, publish, distribute, reproduce, copy, transfer, sell, license, exploit or otherwise make available such information to any third party except where required by law or expressly authorised in writing by WannaTalk.</p>
+
+                <p>The Provider acknowledges that all User information remains confidential and shall be processed only for legitimate service delivery purposes and in accordance with applicable legislation, professional obligations and Platform policies.</p>
+
+                <p>The Provider agrees not to directly or indirectly solicit, recruit, divert, induce, encourage or attempt to encourage any User, client, patient, Provider, employee, contractor, business partner or stakeholder of WannaTalk to terminate, reduce or alter their relationship with WannaTalk.</p>
+
+                <p>The Provider further agrees not to circumvent the Platform by conducting off-platform transactions, consultations, referrals, introductions, payments or service arrangements with Users introduced through WannaTalk where such conduct is intended to avoid Platform fees, commissions, policies, procedures or operational controls.</p>
+
+                <p>The Provider acknowledges that WannaTalk retains all rights, title and interest in its intellectual property, systems, branding, content, software, workflows, questionnaires, assessments, onboarding processes, AI systems, operational methodologies and related materials.</p>
+
+                <p>The obligations contained in this section shall survive termination, suspension, restriction or closure of the Provider account.</p>
+
+                <h3>23. DATA BREACHES, SECURITY INCIDENTS AND POPIA REPORTING</h3>
+
+                <p>The Provider acknowledges that the protection of Personal Information and Special Personal Information is fundamental to the operation of the WannaTalk Platform.</p>
+
+                <p>The Provider agrees to implement and maintain reasonable administrative, technical and operational safeguards to protect information accessed, processed, stored or communicated through the Platform.</p>
+
+                <p>The Provider shall immediately notify WannaTalk of any actual, suspected or potential:</p>
+
+                <ul>
+                    <li>Data breach</li>
+                    <li>Security breach</li>
+                    <li>Unauthorised access</li>
+                    <li>Loss of information</li>
+                    <li>Device compromise</li>
+                    <li>Credential compromise</li>
+                    <li>Account compromise</li>
+                    <li>Malware infection</li>
+                    <li>Cybersecurity incident</li>
+                    <li>Privacy incident</li>
+                </ul>
+
+                <p>The Provider agrees to cooperate fully with WannaTalk, Information Officers, legal representatives, regulators and authorised investigators in relation to any security incident, privacy incident or data breach.</p>
+
+                <p>The Provider shall not conceal, delay or withhold information relating to a suspected or actual breach.</p>
+
+                <p>Where required by law, WannaTalk may notify affected individuals, regulators, law enforcement authorities, professional councils or other relevant authorities.</p>
+
+                <p>The Provider acknowledges that WannaTalk may temporarily suspend access to systems, services or accounts while security investigations, remediation activities or compliance reviews are conducted.</p>
+
+                <p>The Provider agrees to comply with all reasonable security policies, password requirements, authentication controls and cybersecurity procedures implemented by WannaTalk from time to time.</p>
+
+                <h3>24. PROVIDER TYPES, ORGANISATIONS AND COMMUNITY SERVICES</h3>
+
+                <p>The WannaTalk Platform may accommodate and support a diverse range of Providers, organisations and service delivery models.</p>
+
+                <p>Providers may include, but are not limited to:</p>
+
+                <ul>
+                    <li>Healthcare Practitioners</li>
+                    <li>Psychologists</li>
+                    <li>Psychiatrists</li>
+                    <li>Medical Practitioners</li>
+                    <li>Social Workers</li>
+                    <li>Occupational Therapists</li>
+                    <li>Counsellors</li>
+                    <li>Facilitators</li>
+                    <li>Coaches</li>
+                    <li>Mentors</li>
+                    <li>Wellness Practitioners</li>
+                    <li>Peer Support Providers</li>
+                    <li>Addiction Recovery Facilitators</li>
+                    <li>Trauma Support Facilitators</li>
+                    <li>Family Support Practitioners</li>
+                    <li>Employee Wellness Providers</li>
+                    <li>Non-Governmental Organisations (NGOs)</li>
+                    <li>Non-Profit Organisations (NPOs)</li>
+                    <li>Public Benefit Organisations (PBOs)</li>
+                    <li>Schools</li>
+                    <li>Educational Institutions</li>
+                    <li>Universities</li>
+                    <li>Colleges</li>
+                    <li>Churches</li>
+                    <li>Faith-Based Organisations</li>
+                    <li>Community Organisations</li>
+                    <li>Social Development Organisations</li>
+                    <li>Government Programmes</li>
+                    <li>Municipal Programmes</li>
+                    <li>Corporate Wellness Programmes</li>
+                    <li>Employee Assistance Programmes (EAPs)</li>
+                    <li>Community Outreach Programmes</li>
+                    <li>Healthcare Facilities</li>
+                    <li>Clinics</li>
+                    <li>Hospitals</li>
+                    <li>Rehabilitation Centres</li>
+                    <li>Residential Care Facilities</li>
+                    <li>Mental Health Support Organisations</li>
+                    <li>Private Practices</li>
+                    <li>Group Practices</li>
+                    <li>Occupational Health Providers</li>
+                    <li>Wellness Centres</li>
+                    <li>Telehealth Service Providers</li>
+                    <li>Mental Health Advocacy Organisations</li>
+                    <li>Any other approved individual, organisation, institution or service provider authorised by WannaTalk from time to time</li>
+                </ul>
+
+                <p>The above list is illustrative only and shall not be interpreted as limiting the categories of Providers, organisations or services that may be approved by WannaTalk.</p>
+
+                <p>The inclusion of any Provider category does not alter the Provider's legal, professional, ethical or regulatory obligations.</p>
+
+                <p>Each Provider remains solely responsible for ensuring that services rendered through the Platform comply with applicable legislation, professional standards, regulatory requirements, ethical obligations and organisational mandates.</p>
+
+                <h3>25. INDEMNITY</h3>
+
+                <p>The Provider agrees to indemnify and hold harmless WannaTalk, its directors, shareholders, employees, contractors, affiliates, technology providers, AI providers, cloud providers and service providers from and against all claims, damages, liabilities, losses, legal costs, penalties and expenses arising from professional negligence, professional misconduct, regulatory breaches, unlawful conduct, inaccurate disclosures, breach of this Agreement or violation of applicable laws.</p>
+
+                <h3>26. SUSPENSION, RESTRICTION AND TERMINATION</h3>
+
+                <p>WannaTalk reserves the right to suspend, restrict or terminate access to the Platform at its sole discretion.</p>
+
+                <p>Termination or suspension may occur due to fraud, abuse, unlawful conduct, security concerns, breach of these Terms, professional misconduct, operational risk, non-payment, regulatory concerns, inaccurate information supplied by the Provider or any other circumstance that may impact the integrity of the Platform.</p>
+
+                <p>This includes but is not limited to the foregoing circumstances.</p>
+
+                <h3>27. GOVERNING LAW AND JURISDICTION</h3>
+
+                <p>This Agreement shall be governed by the laws of the Republic of South Africa.</p>
+
+                <p>Any disputes arising from use of the Platform shall fall within the jurisdiction of the courts of South Africa.</p>
+
+                <p>The parties agree to attempt good-faith mediation prior to litigation where reasonably practicable.</p>
+
+                <h3>28. ACKNOWLEDGEMENT</h3>
+
+                <p>By registering on, accessing, communicating through, onboarding through, consulting through or using the WannaTalk Platform, the Provider expressly acknowledges and confirms that the Provider has read this Agreement, understands this Agreement, voluntarily agrees to this Agreement, consents to telehealth, consents to electronic communications, consents to AI-assisted processing, consents to recordings and transcription, consents to POPIA processing and agrees to be legally bound by this Agreement.</p>
+
+                <h3>29. PROVIDER DECLARATION</h3>
+
+                <div class="provider-declaration">
+
+                    <p>I hereby declare and confirm that:</p>
+
+                    <ul>
+                        <li>All information supplied during registration, onboarding and verification is true, complete and accurate.</li>
+                        <li>I will operate strictly within my lawful scope of practice.</li>
+                        <li>I will maintain all registrations, licences, memberships and certifications required for the services I provide.</li>
+                        <li>I will immediately notify WannaTalk of any disciplinary action, investigation, suspension, restriction, criminal matter or regulatory concern that may affect my participation on the Platform.</li>
+                        <li>I understand that WannaTalk may verify, audit and re-verify my credentials, qualifications, registrations and professional standing at any time.</li>
+                        <li>I agree to comply with applicable legislation, professional standards, ethical obligations and WannaTalk policies.</li>
+                        <li>I understand that WannaTalk may suspend, restrict or terminate my access where compliance, safety, regulatory or operational concerns arise.</li>
+                        <li>I acknowledge that failure to comply with these obligations may result in disciplinary action, removal from the Platform, legal action or reporting to applicable authorities.</li>
+                        <li>I voluntarily make this declaration and understand that WannaTalk may rely upon the information provided by me.</li>
+                    </ul>
+
+                    <p>I declare that the information supplied by me is true and correct to the best of my knowledge and belief.</p>
+
+                </div>
+            </section>
+
+            <section class="acknowledgement">
+
+                <h3>PROVIDER ELECTRONIC SIGNATURE</h3>
+
+                <p>
+                    Please type your full legal name below as your electronic signature.
+                    By entering your name, you confirm that the information supplied by you
+                    is true and correct and that you intend your electronic signature to
+                    have the same force and effect as a handwritten signature in terms of
+                    applicable South African legislation, including the Electronic
+                    Communications and Transactions Act, 2002.
+                </p>
+
+                <input type="text"
+                       id="provider_signature"
+                       name="provider_signature"
+                       required
+                       placeholder="Enter Full Name"
+                       style="
+            width:100%;
+            padding:14px;
+            border:1px solid #dbe7e5;
+            border-radius:12px;
+            font-size:15px;
+            margin-bottom:20px;
+        " />
+
+                <div class="checkbox-row">
+
+                    <input type="checkbox"
+                           id="accept_terms"
+                           name="accept_terms"
+                           value="accepted"
+                           required />
+
+                    <label for="accept_terms">
+
+                        ACCEPTING ALL ACKNOWLEDGEMENTS AND TERMS AND CONDITIONS
+
+                        <span class="small">
+                            By ticking this box, I confirm that I have read,
+                            understood, accepted and agreed to be legally bound by
+                            the WannaTalk Provider Registration, Professional Conduct,
+                            POPIA, AI Processing, Recording, Transcription,
+                            WhatsApp, SMS, Email and Telehealth Terms.
+                        </span>
+
+                    </label>
+
+                </div>
+
+                
+                <input type="hidden"
+                       name="provider_type"
+                       id="provider_type" />
+
+                <input type="hidden"
+                       name="provider_sub_type"
+                       id="provider_sub_type" />
+
+                <input type="hidden"
+                       name="hpcsa_number"
+                       id="hpcsa_number" />
+
+                <input type="hidden"
+                       name="practice_number"
+                       id="practice_number" />
+
+                <input type="hidden"
+                       name="facility_name"
+                       id="facility_name" />
+
+                <input type="hidden"
+                       name="accepted_ip"
+                       id="accepted_ip" />
+
+                <input type="hidden"
+                       name="user_agent"
+                       id="user_agent" />
+
+                <input type="hidden"
+                       name="accepted_at"
+                       id="accepted_at"
+                       value="" />
+
+                <input type="hidden"
+                       name="document_version"
+                       value="WannaTalk Provider Registration, Professional Conduct, POPIA, AI Processing, Recording, Transcription and Telehealth Terms SA v1.0" />
+
+                <div class="actions">
+
+                    <button type="submit"
+                            class="submit-btn"
+                            id="submitBtn"
+                            disabled>
+                        Submit Acceptance
+                    </button>
+
+                    <button type="button"
+                            class="print-btn"
+                            onclick="window.print()">
+                        Print / Save PDF
+                    </button>
+
+                    <span id="status"
+                          class="status">
+                        Tick the checkbox to continue.
+                    </span>
+
+                </div>
+
+            </section>
+
+        </form>
+
+    </main>
+
+    <script>const checkbox = document.getElementById('accept_terms');
+const submitBtn = document.getElementById('submitBtn');
+const statusText = document.getElementById('status');
+const acceptedAt = document.getElementById('accepted_at');
+const form = document.getElementById('consentForm');
+
+document.getElementById('user_agent').value = navigator.userAgent;
+
+checkbox.addEventListener('change', function () {
+
+    submitBtn.disabled = !this.checked;
+
+    statusText.textContent = this.checked
+        ? 'Ready to submit.'
+        : 'Tick the checkbox to continue.';
+
+    statusText.className = this.checked
+        ? 'status success'
+        : 'status';
+
+    acceptedAt.value = this.checked
+        ? new Date().toISOString()
+        : '';
+
+});
+
+form.addEventListener('submit', function (event) {
+
+    if (!checkbox.checked) {
+
+        event.preventDefault();
+
+        statusText.textContent =
+            'You must accept the acknowledgement and terms before submitting.';
+
+        statusText.className = 'status';
+
+        return;
+
+    }
+
+    acceptedAt.value = new Date().toISOString();
+
+    /*
+        Recommended backend storage:
+
+        provider_id
+        provider_type
+        provider_sub_type
+        hpcsa_number
+        practice_number
+        facility_name
+        document_version
+        accepted_at
+        ip_address
+        user_agent
+        document_hash
+
+    */
+
+});</script>
+
+</body>
+</html>

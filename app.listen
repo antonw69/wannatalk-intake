@@ -1,0 +1,66 @@
+app.post("/api/patient-intake", async (req, res) => {
+  try {
+    const data = req.body;
+
+    const result = await pool.query(
+      `
+      INSERT INTO patient_intakes (
+        full_name,
+        contact_number,
+        email,
+        id_number,
+        date_of_birth,
+        age,
+        emergency_contact_name,
+        emergency_contact_number,
+        preferred_support,
+        current_concerns,
+        duration,
+        feels_safe_now,
+        medical_history,
+        medication,
+        consent_to_process,
+        consent_to_contact,
+        raw_payload
+      )
+      VALUES (
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17
+      )
+      RETURNING id, created_at
+      `,
+      [
+        data.full_name || null,
+        data.contact_number || null,
+        data.email || null,
+        data.id_number || null,
+        data.date_of_birth || null,
+        data.age || null,
+        data.emergency_contact_name || null,
+        data.emergency_contact_number || null,
+        data.preferred_support || null,
+        data.current_concerns || null,
+        data.duration || null,
+        data.feels_safe_now || null,
+        data.medical_history || null,
+        data.medication || null,
+        data.consent_to_process === true || data.consent_to_process === "true",
+        data.consent_to_contact === true || data.consent_to_contact === "true",
+        data
+      ]
+    );
+
+    res.json({
+      success: true,
+      message: "Patient intake saved successfully",
+      intake_id: result.rows[0].id,
+      created_at: result.rows[0].created_at,
+    });
+  } catch (err) {
+    console.error("Patient intake save error:", err);
+    res.status(500).json({
+      success: false,
+      error: "Could not save patient intake",
+      details: err.message,
+    });
+  }
+});

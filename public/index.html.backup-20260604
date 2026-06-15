@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WannaTalk Intake</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --black: #050807;
+            --dark: #0b1411;
+            --green: #18c964;
+            --green-soft: #dffbea;
+            --text: #eaf7ef;
+            --muted: #9fb8aa;
+            --border: #1f3a2d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: radial-gradient(circle at top left, rgba(24,201,100,0.18), transparent 35%), linear-gradient(135deg, var(--black), var(--dark));
+            min-height: 100vh;
+            padding: 16px;
+            color: var(--text);
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(16, 28, 23, 0.96);
+            padding: 24px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+        }
+
+        .logo {
+            display: block;
+            width: 220px;
+            max-width: 70%;
+            margin: 0 auto 18px auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0 0 12px;
+            font-size: 28px;
+            color: white;
+        }
+
+        .intro {
+            text-align: center;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 22px;
+        }
+
+        .section {
+            background: rgba(5, 8, 7, 0.55);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--green-soft);
+            margin-bottom: 14px;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: rgba(5, 8, 7, 0.75);
+            color: white;
+            margin-bottom: 14px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 170px;
+            resize: vertical;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mode-btn {
+            padding: 14px;
+            border-radius: 999px;
+            border: 1px solid var(--green);
+            background: transparent;
+            color: var(--green);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+            .mode-btn.active {
+                background: var(--green);
+                color: #031007;
+            }
+
+        .notice {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 34px;
+            color: var(--green);
+            font-weight: bold;
+            margin: 18px 0;
+        }
+
+        .main-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 999px;
+            background: var(--green);
+            color: #031007;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 15px;
+        }
+
+        .secondary-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 999px;
+            border: 1px solid var(--green);
+            background: transparent;
+            color: var(--green);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 15px;
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 14px;
+            color: var(--green-soft);
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        @media (max-width: 600px) {
+            .mode-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="wrapper">
+        <div class="card">
+
+            <img src="wannatalk logo.png" class="logo" alt="WannaTalk Logo">
+
+            <h1>I Need Help</h1>
+
+            <div class="intro">
+                You are not alone. Share only what you feel comfortable sharing.
+                You can either record a voice note or type a message.
+            </div>
+
+            <div class="section">
+                <div class="section-title">Basic Information</div>
+                <input type="text" id="fullName" placeholder="Name and Surname">
+                <input type="tel" id="contactNumber" placeholder="Contact Number">
+            </div>
+
+            <div class="section">
+                <div class="section-title">How would you like to respond?</div>
+                <div class="mode-buttons">
+                    <button id="voiceModeBtn" class="mode-btn active">Record Voice Note</button>
+                    <button id="textModeBtn" class="mode-btn">Type Message</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Language</div>
+                <label><input type="radio" name="language" value="en" checked> English</label>
+                <label><input type="radio" name="language" value="af"> Afrikaans</label>
+            </div>
+
+            <div class="section">
+                <label>
+                    <input type="checkbox" id="consent">
+                    I consent to WannaTalk recording, transcribing and securely storing this intake.
+                </label>
+
+                <label>
+                    <input type="checkbox" id="shareLocation">
+                    I consent to sharing my location for nearby support suggestions.
+                </label>
+
+                <div class="notice">
+                    This is not an emergency service. If you are in immediate danger, please contact emergency services immediately.
+                </div>
+            </div>
+
+            <div id="voiceMode">
+                <div class="timer" id="timer">02:00</div>
+                <button id="startBtn" class="main-btn">Start Recording</button>
+                <button id="stopBtn" class="secondary-btn" disabled>Stop Recording</button>
+            </div>
+
+            <div id="textMode" style="display:none;">
+                <textarea id="typedMessage" placeholder="Type your message here..."></textarea>
+                <button id="submitTextBtn" class="main-btn">Submit Message</button>
+            </div>
+
+            <div class="status" id="status">Ready</div>
+
+            <div class="footer">© WannaTalk 2026</div>
+
+        </div>
+    </div>
+
+    <script>let mediaRecorder;
+        let audioChunks = [];
+        let stream;
+        let countdownTimer;
+        let recordingTimer;
+
+        const MAX_SECONDS = 120;
+
+        const voiceModeBtn = document.getElementById("voiceModeBtn");
+        const textModeBtn = document.getElementById("textModeBtn");
+        const voiceMode = document.getElementById("voiceMode");
+        const textMode = document.getElementById("textMode");
+        const startBtn = document.getElementById("startBtn");
+        const stopBtn = document.getElementById("stopBtn");
+        const submitTextBtn = document.getElementById("submitTextBtn");
+        const timer = document.getElementById("timer");
+        const statusText = document.getElementById("status");
+
+        let secondsLeft = MAX_SECONDS;
+
+        function updateTimer() {
+            const mins = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+            const secs = String(secondsLeft % 60).padStart(2, "0");
+            timer.innerText = `${mins}:${secs}`;
+        }
+
+        function selectedLanguage() {
+            return document.querySelector('input[name="language"]:checked').value;
+        }
+
+        async function getLocationData() {
+            return new Promise((resolve) => {
+                const shareLocation = document.getElementById("shareLocation");
+
+                if (!shareLocation.checked || !navigator.geolocation) {
+                    resolve(null);
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    pos => resolve({
+                        latitude: pos.coords.latitude,
+                        longitude: pos.coords.longitude,
+                        accuracy: pos.coords.accuracy
+                    }),
+                    () => resolve(null),
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            });
+        }
+
+        voiceModeBtn.onclick = () => {
+            voiceMode.style.display = "block";
+            textMode.style.display = "none";
+            voiceModeBtn.classList.add("active");
+            textModeBtn.classList.remove("active");
+        };
+
+        textModeBtn.onclick = () => {
+            voiceMode.style.display = "none";
+            textMode.style.display = "block";
+            textModeBtn.classList.add("active");
+            voiceModeBtn.classList.remove("active");
+        };
+
+        function stopRecording() {
+            clearInterval(countdownTimer);
+            clearTimeout(recordingTimer);
+
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        startBtn.onclick = async () => {
+            const consent = document.getElementById("consent");
+
+            if (!consent.checked) {
+                alert("Please accept consent first.");
+                return;
+            }
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                let mimeType = "";
+
+                if (MediaRecorder.isTypeSupported("audio/mp4")) {
+                    mimeType = "audio/mp4";
+                } else if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+                    mimeType = "audio/webm;codecs=opus";
+                } else if (MediaRecorder.isTypeSupported("audio/webm")) {
+                    mimeType = "audio/webm";
+                }
+
+                mediaRecorder = mimeType
+                    ? new MediaRecorder(stream, { mimeType })
+                    : new MediaRecorder(stream);
+
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstart = () => {
+                    statusText.innerText = "Recording...";
+                    secondsLeft = MAX_SECONDS;
+                    updateTimer();
+
+                    countdownTimer = setInterval(() => {
+                        secondsLeft--;
+                        updateTimer();
+                        if (secondsLeft <= 0) stopRecording();
+                    }, 1000);
+
+                    recordingTimer = setTimeout(() => {
+                        stopRecording();
+                    }, MAX_SECONDS * 1000);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    try {
+                        statusText.innerText = "Saving voice note...";
+
+                        const actualMimeType = mediaRecorder.mimeType || "audio/webm";
+                        const extension = actualMimeType.includes("mp4") ? "m4a" : "webm";
+
+                        const audioBlob = new Blob(audioChunks, { type: actualMimeType });
+
+                        const formData = new FormData();
+                        formData.append("audio", audioBlob, `voice.${extension}`);
+                        formData.append("language", selectedLanguage());
+                        formData.append("name_and_surname", document.getElementById("fullName").value);
+                        formData.append("contact_number", document.getElementById("contactNumber").value);
+
+                        const location = await getLocationData();
+
+                        if (location) {
+                            formData.append("latitude", location.latitude);
+                            formData.append("longitude", location.longitude);
+                            formData.append("accuracy", location.accuracy);
+                        }
+
+                        const response = await fetch("/transcribe", {
+                            method: "POST",
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            statusText.innerText = "Thank you. Your message has been received.";
+                        } else {
+                            statusText.innerText = result.error || "Something went wrong.";
+                        }
+
+                    } catch (err) {
+                        console.error(err);
+                        statusText.innerText = "Voice note upload failed.";
+                    } finally {
+                        if (stream) stream.getTracks().forEach(track => track.stop());
+                        secondsLeft = MAX_SECONDS;
+                        updateTimer();
+                    }
+                };
+
+                mediaRecorder.start();
+
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+
+            } catch (err) {
+                console.error(err);
+                alert("Microphone access failed.");
+            }
+        };
+
+        stopBtn.onclick = () => {
+            stopRecording();
+        };
+
+        submitTextBtn.onclick = async () => {
+            const consent = document.getElementById("consent");
+
+            if (!consent.checked) {
+                alert("Please accept consent first.");
+                return;
+            }
+
+            const typedMessage = document.getElementById("typedMessage").value;
+
+            if (!typedMessage.trim()) {
+                alert("Please type a message.");
+                return;
+            }
+
+            statusText.innerText = "Saving message...";
+
+            const payload = {
+                text: typedMessage,
+                language: selectedLanguage(),
+                name_and_surname: document.getElementById("fullName").value,
+                contact_number: document.getElementById("contactNumber").value
+            };
+
+            const location = await getLocationData();
+
+            if (location) {
+                payload.latitude = location.latitude;
+                payload.longitude = location.longitude;
+                payload.accuracy = location.accuracy;
+            }
+
+            try {
+                const response = await fetch("/save-text-intake", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById("typedMessage").value = "";
+                    statusText.innerText = "Thank you. Your message has been received.";
+                } else {
+                    statusText.innerText = result.error || "Something went wrong.";
+                }
+
+            } catch (err) {
+                console.error(err);
+                statusText.innerText = "Message submission failed.";
+            }
+        };
+
+        updateTimer();</script>
+
+</body>
+</html>

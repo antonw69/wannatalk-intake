@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+    <title>WannaTalk Guided Intake Preview</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --black: #050807;
+            --dark: #0b1411;
+            --card: #101c17;
+            --green: #18c964;
+            --green-soft: #dffbea;
+            --muted: #9fb8aa;
+            --text: #eaf7ef;
+            --border: #1f3a2d;
+            --danger: #ff6b6b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, rgba(24,201,100,0.22), transparent 34%), radial-gradient(circle at bottom right, rgba(24,201,100,0.10), transparent 35%), linear-gradient(135deg, var(--black), var(--dark));
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .phone-frame {
+            width: 100%;
+            max-width: 430px;
+            min-height: 720px;
+            background: rgba(16, 28, 23, 0.96);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .topbar {
+            padding: 22px 22px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 22px;
+            letter-spacing: 0.3px;
+        }
+
+            .brand span {
+                color: var(--green);
+            }
+
+        .admin-mini {
+            color: var(--green);
+            font-size: 12px;
+            text-decoration: none;
+            opacity: 0.75;
+        }
+
+        .progress-wrap {
+            padding: 0 22px 12px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .progress {
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            overflow: hidden;
+        }
+
+            .progress > div {
+                height: 100%;
+                width: 20%;
+                background: linear-gradient(135deg, var(--green), #0f8f49);
+                border-radius: 999px;
+                transition: width 0.35s ease;
+            }
+
+        .screen {
+            display: none;
+            padding: 28px 24px 24px;
+            min-height: 560px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            animation: slideIn 0.32s ease both;
+        }
+
+            .screen.active {
+                display: block;
+            }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon-bubble {
+            width: 66px;
+            height: 66px;
+            border-radius: 22px;
+            margin-bottom: 18px;
+            background: rgba(24,201,100,0.12);
+            border: 1px solid rgba(24,201,100,0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 28px;
+            line-height: 1.15;
+        }
+
+        h2 {
+            margin: 0 0 12px;
+            font-size: 24px;
+            line-height: 1.2;
+        }
+
+        p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0 0 18px;
+        }
+
+        .soft-note {
+            color: var(--green-soft);
+            font-size: 13px;
+            background: rgba(5,8,7,0.55);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px;
+            margin: 18px 0;
+            line-height: 1.5;
+        }
+
+        input, textarea {
+            width: 100%;
+            background: rgba(5,8,7,0.78);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 18px;
+            padding: 16px;
+            font-size: 16px;
+            outline: none;
+            margin: 8px 0 16px;
+        }
+
+        textarea {
+            min-height: 185px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+        }
+
+            input::placeholder, textarea::placeholder {
+                color: #6f8879;
+            }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        button {
+            border: none;
+            border-radius: 999px;
+            padding: 14px 18px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+            button:hover {
+                transform: translateY(-1px);
+            }
+
+        .primary {
+            background: var(--green);
+            color: #031007;
+            flex: 1;
+        }
+
+        .secondary {
+            background: transparent;
+            color: var(--green);
+            border: 1px solid var(--green);
+            flex: 1;
+        }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .choice-card {
+            border: 1px solid var(--border);
+            background: rgba(5,8,7,0.52);
+            border-radius: 22px;
+            padding: 18px;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.18s ease;
+        }
+
+            .choice-card:hover {
+                border-color: rgba(24,201,100,0.7);
+                transform: translateY(-2px);
+            }
+
+        .choice-title {
+            color: var(--green-soft);
+            font-size: 17px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .choice-copy {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .timer {
+            display: inline-block;
+            font-size: 34px;
+            font-weight: 900;
+            color: var(--green);
+            padding: 12px 20px;
+            border-radius: 18px;
+            border: 1px solid rgba(24,201,100,0.35);
+            background: rgba(24,201,100,0.10);
+            margin: 8px 0 16px;
+        }
+
+        .consent {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: rgba(5,8,7,0.55);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 13px;
+            margin: 16px 0;
+            font-size: 12.5px;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+            .consent input {
+                width: auto;
+                margin: 2px 0 0;
+                accent-color: var(--green);
+            }
+
+        .back-arrow {
+            position: absolute;
+            top: 24px;
+            left: 18px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid rgba(24,201,100,.25);
+            background: rgba(5,8,7,.45);
+            color: var(--green-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: .18s ease;
+            z-index: 20;
+        }
+
+            .back-arrow:hover {
+                transform: translateX(-2px);
+                border-color: rgba(24,201,100,.5);
+            }
+
+        .content-center {
+            width: 100%;
+            max-width: 340px;
+            margin: 0 auto;
+        }
+
+        .back-arrow {
+            position: absolute;
+            top: 24px;
+            left: 18px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid rgba(24,201,100,.25);
+            background: rgba(5,8,7,.45);
+            color: var(--green-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: .18s ease;
+            z-index: 20;
+        }
+
+            .back-arrow:hover {
+                transform: translateX(-2px);
+                border-color: rgba(24,201,100,.5);
+            }
+
+        .content-center {
+            width: 100%;
+            max-width: 340px;
+            margin: 0 auto;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 12px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: var(--green);
+            opacity: 0.7;
+        }
+
+        .status {
+            min-height: 20px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--green-soft);
+            font-weight: 700;
+        }
+
+        .summary-card {
+            background: rgba(24,201,100,0.10);
+            border: 1px solid rgba(24,201,100,0.3);
+            border-radius: 20px;
+            padding: 16px;
+            margin: 18px 0;
+            text-align: left;
+        }
+
+            .summary-card div {
+                margin: 6px 0;
+                font-size: 13px;
+                color: var(--muted);
+            }
+
+            .summary-card strong {
+                color: var(--green-soft);
+            }
+
+        @media (max-width: 460px) {
+            .phone-frame {
+                min-height: 700px;
+                border-radius: 24px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            .screen {
+                padding: 24px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        <div class="topbar">
+            <div class="brand">Wanna<span>Talk</span></div>
+            <a href="#" class="admin-mini">Admin</a>
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-label">
+                <span id="stepText">Step 1 of 5</span>
+                <span>Talk it out</span>
+            </div>
+            <div class="progress"><div id="progressBar"></div></div>
+        </div>
+
+        <div class="back-arrow">←</div>
+
+        <div class="back-arrow">←</div>
+
+        <section class="screen active" id="screenWelcome">
+            <div class="content-center">
+                <div class="content-center">
+                    <div class="icon-bubble">💬</div>
+                    <h1>Welcome. You are not alone.</h1>
+                    <p>We will guide you gently, one step at a time. You can choose to record a voice note or type a message.</p>
+                    <div class="soft-note">This is not an emergency service. If you are in immediate danger, please contact emergency services now.</div>
+                    <div class="button-row">
+                        <button class="primary" onclick="nextScreen('screenName', 2)">Start</button>
+                    </div>
+                </div>
+        </section>
+
+    </div>
+    </section>
+
+    <section class="screen" id="screenName">
+        <div class="content-center">
+            <div class="content-center">
+                <div class="icon-bubble">👋</div>
+                <h2>What should we call you?</h2>
+                <p>Please enter your name and surname. This helps our team respond to you personally.</p>
+                <input id="fullName" placeholder="Name and surname">
+                <div class="button-row">
+                    <button class="secondary" onclick="nextScreen('screenWelcome', 1)">Back</button>
+                    <button class="primary" onclick="nextScreen('screenContact', 3)">Next</button>
+                </div>
+            </div>
+    </section>
+
+    </div>
+    </section>
+
+    <section class="screen" id="screenContact">
+        <div class="content-center">
+            <div class="content-center">
+                <div class="icon-bubble">📱</div>
+                <h2>How can we reach you?</h2>
+                <p>Please enter a contact number. We will only use this to follow up on your request.</p>
+                <input id="contactNo" placeholder="Contact number" inputmode="tel">
+                <div class="button-row">
+                    <button class="secondary" onclick="nextScreen('screenName', 2)">Back</button>
+                    <button class="primary" onclick="nextScreen('screenChoice', 4)">Next</button>
+                </div>
+            </div>
+    </section>
+
+    </div>
+    </section>
+
+    <section class="screen" id="screenChoice">
+        <div class="content-center">
+            <div class="content-center">
+                <div class="icon-bubble">🌱</div>
+                <h2>How would you like to share?</h2>
+                <p>Choose the option that feels easiest for you right now.</p>
+
+                <div class="choice-grid">
+                    <div class="choice-card" onclick="nextScreen('screenVoice', 5)">
+                        <div class="choice-title">🎙 Record a voice note</div>
+                        <div class="choice-copy">Speak freely for up to 2 minutes. Best for English voice notes.</div>
+                    </div>
+
+                    <div class="choice-card" onclick="nextScreen('screenMemo', 5)">
+                        <div class="choice-title">✍️ Type a message</div>
+                        <div class="choice-copy">Write at your own pace. Recommended for Afrikaans or detailed messages.</div>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button class="secondary" onclick="nextScreen('screenContact', 3)">Back</button>
+                </div>
+            </div>
+    </section>
+
+    </div>
+    </section>
+
+    <section class="screen" id="screenVoice">
+        <div class="content-center">
+            <div class="content-center">
+                <div class="icon-bubble">🎙</div>
+                <h2>Tell us about yourself</h2>
+                <p>When you are ready, tell us what you are going through and how we can assist.</p>
+                <div class="summary-card">
+                    <div><strong>Name:</strong> <span class="previewName">Not entered</span></div>
+                    <div><strong>Contact:</strong> <span class="previewContact">Not entered</span></div>
+                </div>
+                <div class="timer">02:00</div>
+                <div class="consent"><input type="checkbox"> <span>I consent to WannaTalk recording, transcribing and storing this voice note for intake purposes.</span></div>
+                <button class="primary">Start Recording</button>
+                <button class="secondary" style="width:100%;margin-top:10px;">Stop Recording</button>
+                <div class="status">Preview only: recording controls will connect to your current backend.</div>
+            </div>
+    </section>
+
+    </div>
+    </section>
+
+    <section class="screen" id="screenMemo">
+        <div class="content-center">
+            <div class="content-center">
+                <div class="icon-bubble">✍️</div>
+                <h2>Tell us about yourself</h2>
+                <p>Share what you are going through and how we can assist. Only share what you feel comfortable sharing.</p>
+                <div class="summary-card">
+                    <div><strong>Name:</strong> <span class="previewName">Not entered</span></div>
+                    <div><strong>Contact:</strong> <span class="previewContact">Not entered</span></div>
+                </div>
+                <textarea placeholder="Type your message here..."></textarea>
+                <div class="consent"><input type="checkbox"> <span>I consent to WannaTalk storing and reviewing this message for intake purposes.</span></div>
+                <button class="primary" style="width:100%;">Submit Message</button>
+                <div class="status">Preview only: submit will connect to your current text-intake endpoint.</div>
+    </section>
+
+    </div>
+    </section>
+
+    </div>
+    </section>
+
+    <div class="footer">© WannaTalk 2026</div>
+    </div>
+
+    <script>const screens = document.querySelectorAll('.screen');
+  const progressBar = document.getElementById('progressBar');
+  const stepText = document.getElementById('stepText');
+
+  function nextScreen(screenId, step) {
+    screens.forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    progressBar.style.width = (step * 20) + '%';
+    stepText.innerText = 'Step ' + step + ' of 5';
+
+    const name = document.getElementById('fullName').value || 'Not entered';
+    const contact = document.getElementById('contactNo').value || 'Not entered';
+    document.querySelectorAll('.previewName').forEach(el => el.innerText = name);
+    document.querySelectorAll('.previewContact').forEach(el => el.innerText = contact);
+  }</script>
+
+</body>
+</html>
+

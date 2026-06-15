@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WannaTalk Patient Consent and Acknowledgement</title>
+  <style>
+    :root {
+      --primary: #0f4c5c;
+      --primary-dark: #0b3b48;
+      --bg: #f4f6f8;
+      --text: #1f2937;
+      --muted: #64748b;
+      --border: #dbe7e5;
+      --danger: #b91c1c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 18px 60px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 34px 34px 26px;
+      background: linear-gradient(135deg, #eef7f9 0%, #ffffff 58%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      color: var(--primary-dark);
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(15, 76, 92, 0.20);
+    }
+
+    h1 {
+      font-size: 30px;
+      line-height: 1.2;
+      margin: 0 0 10px;
+      color: #0f172a;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin: 4px 0 0;
+      color: var(--primary-dark);
+    }
+
+    h3 {
+      font-size: 20px;
+      margin-top: 34px;
+      margin-bottom: 10px;
+      color: #0f172a;
+      border-top: 1px solid #edf2f7;
+      padding-top: 24px;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 16px;
+    }
+
+    .notice {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-left: 5px solid #0f4c5c;
+      background: #eef7f9;
+      border-radius: 12px;
+      color: #0f4c5c;
+      font-size: 14px;
+    }
+
+    .terms-box {
+      max-height: 68vh;
+      overflow-y: auto;
+      padding: 30px 34px;
+      scroll-behavior: smooth;
+    }
+
+    ul {
+      margin-top: 8px;
+      margin-bottom: 16px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    .acknowledgement {
+      padding: 26px 34px;
+      border-top: 1px solid var(--border);
+      background: #fbfefd;
+      position: sticky;
+      bottom: 0;
+      z-index: 3;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      border-radius: 16px;
+    }
+
+    .checkbox-row input {
+      width: 22px;
+      height: 22px;
+      margin-top: 2px;
+      accent-color: var(--primary-dark);
+      flex: 0 0 auto;
+    }
+
+    .checkbox-row label {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .small {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .submit-btn {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(15, 76, 92, 0.22);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .print-btn {
+      background: #eef2f7;
+      color: #334155;
+    }
+
+    .status {
+      font-size: 14px;
+      color: var(--danger);
+      margin-left: 4px;
+    }
+
+    .success {
+      color: #047857;
+      font-weight: 700;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+
+      .page {
+        max-width: none;
+        padding: 0;
+      }
+
+      .card {
+        border: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      .terms-box {
+        max-height: none;
+        overflow: visible;
+      }
+
+      .acknowledgement {
+        position: static;
+      }
+
+      .actions {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header, .terms-box, .acknowledgement {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .terms-box {
+        max-height: 64vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <form id="consentForm" class="card" method="POST" action="/api/patient-consent">
+      <section class="header">
+        <div class="brand">
+          <span class="brand-mark">W</span>
+          <span>WannaTalk</span>
+        </div>
+        <div class="notice">
+          Please read the full patient consent, acknowledgement, POPIA, AI processing, recording, transcription, WhatsApp, SMS, email and telehealth terms before accepting.
+        </div>
+      </section>
+
+      <section class="terms-box" id="termsBox">
+        <h1>WANNATALK PATIENT CONSENT, ACKNOWLEDGEMENT, PRIVACY, AI PROCESSING AND TELEHEALTH TERMS</h1>
+<h2>REPUBLIC OF SOUTH AFRICA</h2>
+<p class='subtitle'>APPLICABLE TO ALL USERS, PATIENTS, CLIENTS, MEMBERS, FACILITATORS, COUNSELLORS, HEALTHCARE PRACTITIONERS, PSYCHOLOGISTS, PSYCHIATRISTS AND PARTICIPANTS UTILISING THE WANTATALK PLATFORM</p>
+<h3>1. INTRODUCTION</h3>
+<p>This Patient Consent, Acknowledgement, Privacy, AI Processing and Telehealth Agreement (&quot;Agreement&quot;) governs the access to, use of, participation in, and interaction with the WannaTalk platform, systems, applications, software, services, websites, mobile applications, APIs, communication systems, WhatsApp systems, AI systems, onboarding systems, scheduling systems, voice intake systems, consultation systems, and all associated services operated by or on behalf of WannaTalk.</p>
+<p>By accessing, browsing, registering on, installing, downloading, communicating through, participating in, or using the WannaTalk platform or any associated service, the User acknowledges that they have read, understood, and expressly consented to all provisions contained in this Agreement.</p>
+<p>This Agreement constitutes a legally binding agreement between the User and WannaTalk.</p>
+<p>If the User does not agree to these Terms, the User must immediately discontinue all use of the Platform and associated services.</p>
+<h3>2. DEFINITIONS</h3>
+<p>For purposes of this Agreement:</p>
+<p>&quot;Platform&quot; includes all WannaTalk websites, mobile applications, software applications, APIs, cloud systems, databases, voice systems, AI systems, onboarding systems, communication systems, and infrastructure.</p>
+<p>&quot;User&quot; or &quot;Patient&quot; means any person accessing, registering on, participating in, or using the Platform.</p>
+<p>&quot;Healthcare Practitioner&quot; means a practitioner registered with the Health Professions Council of South Africa (HPCSA) or any other applicable South African regulatory body.</p>
+<p>&quot;Facilitator&quot; means a non-HPCSA registered facilitator, mentor, coach, support provider, or wellness facilitator operating within their lawful scope.</p>
+<p>&quot;Special Personal Information&quot; shall bear the meaning assigned in the Protection of Personal Information Act 4 of 2013 (POPIA).</p>
+<p>&quot;AI Services&quot; includes artificial intelligence systems, transcription systems, speech recognition systems, summarisation systems, language processing systems, categorisation systems, machine learning systems, automation systems, risk detection systems, and associated technologies.</p>
+<p>&quot;Electronic Communications&quot; includes WhatsApp, SMS, email, push notifications, voice calls, AI-generated messages, platform messaging systems, and digital communications.</p>
+<p>&quot;Telehealth Services&quot; includes remote healthcare interactions, telemedicine, telepsychology, telepsychiatry, counselling sessions, video consultations, digital consultations, onboarding interactions, messaging consultations, and remote assessments.</p>
+<h3>3. NATURE OF THE PLATFORM</h3>
+<p>WannaTalk operates as a digital healthcare, wellness, communication, onboarding, and mental health technology platform.</p>
+<p>WannaTalk itself does not practice medicine, psychiatry, psychology, counselling, or any regulated healthcare profession unless specifically stated otherwise.</p>
+<p>Healthcare services are independently rendered by healthcare practitioners, psychologists, psychiatrists, counsellors, facilitators, or other service providers utilising the Platform.</p>
+<p>The User acknowledges that WannaTalk merely facilitates digital communication, onboarding, workflow management, scheduling, communication systems, AI systems, and associated technological infrastructure.</p>
+<p>The User acknowledges that no doctor-patient, psychologist-patient, therapist-patient, or healthcare provider relationship is created with WannaTalk itself through use of the Platform.</p>
+<h3>4. APPLICABLE SOUTH AFRICAN LEGISLATION</h3>
+<p>This Agreement shall be governed by and interpreted in accordance with the laws of the Republic of South Africa.</p>
+<p>The Platform and associated services shall operate subject to applicable South African legislation including but not limited to:</p>
+<ul>
+<li>Protection of Personal Information Act 4 of 2013 (POPIA)</li>
+<li>Electronic Communications and Transactions Act 25 of 2002 (ECTA)</li>
+<li>National Health Act 61 of 2003</li>
+<li>Health Professions Act 56 of 1974</li>
+<li>HPCSA Ethical Rules and Telehealth Guidelines</li>
+<li>Consumer Protection Act 68 of 2008</li>
+<li>Cybercrimes Act 19 of 2020</li>
+<li>Medicines and Related Substances Act 101 of 1965</li>
+<li>Common law obligations relating to confidentiality and consent</li>
+</ul>
+<h3>5. USER ACKNOWLEDGEMENT AND GENERAL CONSENT</h3>
+<p>The User expressly acknowledges and agrees that:</p>
+<ul>
+<li>The User is voluntarily utilising the Platform.</li>
+<li>The User understands the inherent risks associated with telehealth and digital communication systems.</li>
+<li>The User consents to electronic communication.</li>
+<li>The User consents to digital onboarding.</li>
+<li>The User consents to AI-assisted processing.</li>
+<li>The User consents to storage and processing of Personal Information and Special Personal Information.</li>
+<li>The User consents to electronic recordkeeping.</li>
+<li>The User acknowledges that telehealth services may not replace physical in-person healthcare assessments.</li>
+<li>The User acknowledges that remote consultations carry limitations.</li>
+<li>The User acknowledges that emergency situations may require physical intervention.</li>
+</ul>
+<h3>6. TELEHEALTH RISKS AND LIMITATIONS</h3>
+<p>The User acknowledges and accepts all inherent risks associated with telehealth and digital healthcare systems including but not limited to:</p>
+<ul>
+<li>Poor audio quality</li>
+<li>Poor video quality</li>
+<li>Network interruptions</li>
+<li>Connectivity failures</li>
+<li>Delayed communications</li>
+<li>Platform outages</li>
+<li>Device failures</li>
+<li>Data corruption</li>
+<li>Cybersecurity incidents</li>
+<li>Incomplete medical records</li>
+<li>Delayed treatment</li>
+<li>Inaccurate disclosures</li>
+<li>Miscommunication</li>
+<li>Misinterpretation of information</li>
+<li>Inability to perform physical examinations</li>
+<li>Inability to assess behavioural or physical symptoms fully</li>
+<li>Delayed emergency intervention</li>
+</ul>
+<p>The User understands that telehealth services may not be appropriate for all conditions.</p>
+<p>The User acknowledges that the Platform may not be suitable for:</p>
+<ul>
+<li>Psychiatric emergencies</li>
+<li>Suicidal ideation requiring emergency intervention</li>
+<li>Self-harm emergencies</li>
+<li>Acute psychosis</li>
+<li>Violent behaviour</li>
+<li>Severe substance abuse emergencies</li>
+<li>Medical emergencies</li>
+<li>Conditions requiring physical examination</li>
+<li>Conditions requiring immediate emergency treatment</li>
+</ul>
+<p>The User acknowledges that the User may be instructed to seek immediate in-person healthcare treatment where clinically appropriate.</p>
+<h3>7. EMERGENCY DISCLAIMER</h3>
+<p>WannaTalk is not an emergency service.</p>
+<p>The Platform is not intended to replace emergency services, emergency psychiatric intervention, hospital care, ambulance services, or crisis intervention centres.</p>
+<p>If the User experiences suicidal thoughts, self-harm intentions, overdose, severe psychiatric distress, psychosis, violence risk, severe panic, loss of consciousness, chest pain, seizures, severe medical distress, or any emergency condition, the User must immediately contact emergency services, present to the nearest hospital, contact SAPS where appropriate, contact emergency psychiatric services, contact crisis support organisations, or seek immediate physical healthcare assistance.</p>
+<p>WannaTalk reserves the right to contact emergency contacts, healthcare providers, authorities, hospitals, emergency services, or SAPS where WannaTalk reasonably believes that a User presents a risk of serious harm to themselves or others.</p>
+<h3>8. AGE AND LEGAL CAPACITY</h3>
+<p>The User warrants that the User is at least eighteen (18) years of age and legally capable of consenting to this Agreement.</p>
+<p>Where the User is under eighteen (18) years of age, parental consent may be required, guardian consent may be required, additional verification may be required, and services may be restricted.</p>
+<p>The User warrants that all information supplied is complete, true, accurate, and current.</p>
+<h3>9. CONSENT TO AI PROCESSING</h3>
+<p>The User expressly consents to the use of artificial intelligence systems, machine learning systems, speech recognition systems, transcription systems, summarisation systems, categorisation systems, language processing systems, automation systems, onboarding systems, and analytical systems.</p>
+<p>The User acknowledges that AI systems may process voice recordings, audio files, uploaded documents, onboarding questionnaires, chat conversations, WhatsApp messages, emails, intake assessments, consultation notes, transcripts, behavioural information, emotional indicators, metadata, scheduling data, and communication records.</p>
+<p>The User acknowledges that AI-generated outputs may include summaries, transcription, categorisation, language analysis, sentiment analysis, risk flagging, onboarding assistance, workflow automation, and administrative assistance.</p>
+<p>The User acknowledges that AI outputs may be inaccurate, incomplete, delayed, biased, inappropriate, misleading, or incorrectly interpreted.</p>
+<p>The User acknowledges that AI outputs do not constitute medical advice, psychiatric advice, psychological diagnosis, therapy, counselling, prescriptions, or healthcare treatment.</p>
+<p>The User agrees that all healthcare decisions remain subject to review and confirmation by appropriately qualified healthcare practitioners.</p>
+<h3>10. CONSENT TO RECORDINGS</h3>
+<p>The User expressly consents to voice recordings, onboarding recordings, consultation recordings, intake recordings, communication recordings, and uploaded audio recordings being captured, stored, processed, analysed, transcribed, summarised, archived, reviewed, monitored, and retained.</p>
+<p>The User acknowledges that recordings may be utilised for onboarding, quality assurance, legal protection, compliance monitoring, auditing, practitioner review, continuity of care, supervision, training, operational support, dispute resolution, and AI-assisted processing.</p>
+<p>The User acknowledges that recordings may be processed by third-party cloud providers and AI providers.</p>
+<h3>11. WHATSAPP, SMS AND EMAIL COMMUNICATIONS</h3>
+<p>The User expressly consents to communications via WhatsApp, SMS, email, push notifications, AI-generated communications, digital notices, platform notifications, and automated communication systems.</p>
+<p>The User acknowledges that third-party messaging systems are outside the exclusive control of WannaTalk, messages may be intercepted, devices may be compromised, accounts may be accessed by unauthorised persons, messages may fail to deliver, and electronic communications are not completely secure.</p>
+<p>The User acknowledges that WannaTalk shall not be liable for delayed messages, message failures, delivery failures, platform outages, third-party messaging failures, interception of communications, or unauthorised device access.</p>
+<h3>12. POPIA CONSENT</h3>
+<p>The User expressly consents to the collection, storage, processing, retention, transfer, analysis, categorisation, sharing, and lawful use of Personal Information and Special Personal Information.</p>
+<p>The User acknowledges that Special Personal Information may include health information, mental health information, psychiatric information, medication information, counselling records, biometric information, voice recordings, identity information, emotional information, behavioural information, demographic information, location information, and communication records.</p>
+<p>The User acknowledges that WannaTalk may process information for onboarding, service delivery, healthcare continuity, compliance, legal obligations, quality assurance, AI processing, operational support, analytics, auditing, fraud prevention, cybersecurity, and lawful business purposes.</p>
+<h3>13. CROSS-BORDER DATA PROCESSING</h3>
+<p>The User acknowledges that certain service providers, cloud providers, hosting providers, AI providers, analytics providers, communication providers, and infrastructure providers may process information outside the Republic of South Africa.</p>
+<p>The User expressly consents to cross-border processing and transfer of Personal Information where reasonably necessary for operation of the Platform.</p>
+<h3>14. MEDICAL AND PSYCHOLOGICAL RECORDS</h3>
+<p>The User acknowledges that medical, psychological, counselling, onboarding, consultation, communication, and operational records may be created, stored, archived, processed, analysed, and retained.</p>
+<p>The User acknowledges that records may be retained in accordance with legal obligations, regulatory obligations, professional guidelines, HPCSA requirements, insurance requirements, operational requirements, and lawful business requirements.</p>
+<p>The User acknowledges that records may not be deleted immediately upon request where legal or operational retention obligations apply.</p>
+<h3>15. USER RESPONSIBILITIES</h3>
+<p>The User agrees not to provide false information, not to impersonate another person, not to misuse the Platform, not to upload unlawful material, not to distribute malware, not to attempt unauthorised access, not to interfere with Platform operations, not to reverse engineer systems, and not to use the Platform unlawfully.</p>
+<p>The User agrees to provide accurate and complete information relevant to healthcare assessments and onboarding.</p>
+<h3>16. LIMITATION OF LIABILITY</h3>
+<p>WannaTalk shall not be liable for clinical decisions, practitioner conduct, facilitator conduct, healthcare outcomes, delayed treatment, failed communications, third-party platform failures, cloud outages, cyberattacks, data interception, inaccurate AI outputs, transcription inaccuracies, device failures, internet outages, indirect damages, consequential damages, punitive damages, emotional distress, or loss arising from use of the Platform.</p>
+<p>The User acknowledges that use of the Platform occurs entirely at the User&#x27;s own risk.</p>
+<h3>17. INDEMNITY</h3>
+<p>The User agrees to indemnify and hold harmless WannaTalk, its directors, shareholders, employees, contractors, practitioners, facilitators, technology providers, AI providers, cloud providers, and affiliates from and against all claims, damages, liabilities, losses, legal costs, penalties, and expenses arising from breach of this Agreement, unlawful conduct, misuse of the Platform, inaccurate disclosures, unauthorised use, third-party claims, or violation of applicable laws.</p>
+<h3>18. TERMINATION</h3>
+<p>WannaTalk reserves the right to suspend, restrict, or terminate access to the Platform at its sole discretion.</p>
+<p>Termination may occur due to fraud, abuse, unlawful conduct, security concerns, breach of these Terms, professional misconduct, operational risk, non-payment, or regulatory concerns.</p>
+<p>Following termination, access to systems, accounts, records, and services may be restricted.</p>
+<h3>19. GOVERNING LAW AND JURISDICTION</h3>
+<p>This Agreement shall be governed by the laws of the Republic of South Africa.</p>
+<p>Any disputes arising from use of the Platform shall fall within the jurisdiction of the courts of South Africa.</p>
+<p>The parties agree to attempt good-faith mediation prior to litigation where reasonably practicable.</p>
+<h3>20. ACKNOWLEDGEMENT</h3>
+<p>By registering on, accessing, communicating through, onboarding through, or using the WannaTalk Platform, the User expressly acknowledges and confirms that the User has read this Agreement, understands this Agreement, voluntarily agrees to this Agreement, consents to telehealth, consents to electronic communications, consents to AI-assisted processing, consents to recordings and transcription, consents to POPIA processing, and agrees to be legally bound by this Agreement.</p>
+      </section>
+
+      <section class="acknowledgement">
+        <div class="checkbox-row">
+          <input type="checkbox" id="accept_terms" name="accept_terms" value="accepted" required />
+          <label for="accept_terms">
+            Accepting all acknowledgement and terms and condition
+            <span class="small">
+              By ticking this box, I confirm that I have read, understood, accepted and agreed to be legally bound by the above WannaTalk Patient Consent, Acknowledgement, POPIA, AI Processing, Recording, Transcription, WhatsApp, SMS, Email and Telehealth Terms.
+            </span>
+          </label>
+        </div>
+
+        <input type="hidden" name="document_version" value="WannaTalk Patient Consent SA v1.0" />
+        <input type="hidden" name="accepted_at" id="accepted_at" value="" />
+
+        <div class="actions">
+          <button type="submit" class="submit-btn" id="submitBtn" disabled>Submit Acceptance</button>
+          <button type="button" class="print-btn" onclick="window.print()">Print / Save PDF</button>
+          <span id="status" class="status">Tick the checkbox to continue.</span>
+        </div>
+      </section>
+    </form>
+  </main>
+
+  <script>
+    const checkbox = document.getElementById('accept_terms');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusText = document.getElementById('status');
+    const acceptedAt = document.getElementById('accepted_at');
+    const form = document.getElementById('consentForm');
+
+    checkbox.addEventListener('change', function () {
+      submitBtn.disabled = !this.checked;
+      statusText.textContent = this.checked ? 'Ready to submit.' : 'Tick the checkbox to continue.';
+      statusText.className = this.checked ? 'status success' : 'status';
+      acceptedAt.value = this.checked ? new Date().toISOString() : '';
+    });
+
+    form.addEventListener('submit', function (event) {
+      if (!checkbox.checked) {
+        event.preventDefault();
+        statusText.textContent = 'You must accept the acknowledgement and terms before submitting.';
+        statusText.className = 'status';
+        return;
+      }
+
+      acceptedAt.value = new Date().toISOString();
+
+      /*
+        Backend note:
+        This form currently posts to /api/patient-consent.
+        Store at least:
+        - patient/user ID
+        - document version
+        - accepted_at timestamp
+        - IP address
+        - user agent
+        - checkbox value
+        - full document/version hash if available
+      */
+    });
+  </script>
+</body>
+</html>

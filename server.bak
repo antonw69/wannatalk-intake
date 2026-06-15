@@ -1,0 +1,387 @@
+import { File } from "node:buffer";
+globalThis.File = File;
+
+import express from "express";
+import multer from "multer";
+import fs from "fs";
+import path from "path";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const { default: OpenAI } = await import("openai");
+
+const app = express();
+const upload = multer({ dest: "uploads/" });
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+
+function getTimestamp() {
+    return new Date().toISOString().replace(/[:.]/g, "-");
+}
+
+function ensureFolder(folder) {
+    if (!fs.existsSync(folder)) {
+        fs.mkdirSync(folder, { recursive: true });
+    }
+}
+
+app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
+    let tempFile;
+
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                error: "No audio file uploaded",
+            });
+        }
+
+        ensureFolder("saved_voice_notes");
+        ensureFolder("saved_transcripts");
+        ensureFolder("saved_analysis");
+
+        const timestamp = getTimestamp();
+
+        const selectedLanguage = req.body.language || "en";
+        const latitude = req.body.latitude || "Not provided";
+        const longitude = req.body.longitude || "Not provided";
+        const accuracy = req.body.accuracy || "Not provided";
+
+        tempFile = req.file.path + ".webm";
+
+        const savedAudioFile = path.join(
+            "saved_voice_notes",
+            `voice-note-${timestamp}.webm`
+        );
+
+        const savedTranscriptFile = path.join(
+            "saved_transcripts",
+            `transcript-${timestamp}.txt`
+        );
+
+        const savedAnalysisFile = path.join(
+            "saved_analysis",
+            `analysis-${timestamp}.json`
+        );
+
+        fs.renameSync(req.file.path, tempFile);
+        fs.copyFileSync(tempFile, savedAudioFile);
+
+        const transcription = await openai.audio.transcriptions.create({
+            file: fs.createReadStream(tempFile),
+            model: "gpt-4o-mini-transcribe",
+            language: selectedLanguage,
+            response_format: "json",
+        });
+
+        const rawTranscript = transcription.text || "";
+
+        const cleanup = await openai.chat.completions.create({
+            model: "gpt-4.1-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: `
+You are an intake assistant for WannaTalk.
+
+The transcript may contain speech-to-text errors, especially in Afrikaans or mixed Afrikaans/English.
+
+Your job:
+- Correct obvious transcription mistakes.
+- Preserve the person's meaning.
+- Do not invent facts.
+- Do not diagnose.
+- Extract useful intake information.
+- If something is unclear, use "Unknown".
+- If a phone number is partially clear, reconstruct only if reasonably confident.
+- South African cellphone numbers usually start with 06, 07 or 08 and have 10 digits.
+
+Return JSON only in this exact structure:
+{
+  "detected_language": "",
+  "name_and_surname": "",
+  "age": "",
+  "contact_number": "",
+  "what_they_are_going_through": "",
+  "how_long_feeling_this_way": "",
+  "feels_safe_now": "yes | no | unknown",
+  "preferred_support": "counsellor | psychologist | psychiatrist | unknown",
+  "risk_level": "low | medium | high | urgent | unknown",
+  "risk_flags": [],
+  "cleaned_transcript": "",
+  "summary": "",
+  "requires_human_review": true
+}
+`
+                },
+                {
+                    role: "user",
+                    content: `
+Selected language from user: ${selectedLanguage}
+
+Raw transcript:
+${rawTranscript}
+`
+                }
+            ],
+            response_format: { type: "json_object" },
+        });
+
+        const analysisJsonText = cleanup.choices[0].message.content;
+        let analysis;
+
+        try {
+            analysis = JSON.parse(analysisJsonText);
+        } catch {
+            analysis = {
+                error: "Could not parse analysis JSON",
+                raw_analysis: analysisJsonText,
+            };
+        }
+
+        const transcriptContent = `
+WannaTalk Voice Intake
+Date/Time: ${new Date().toISOString()}
+
+Selected Language: ${selectedLanguage}
+
+Location Consent:
+Latitude: ${latitude}
+Longitude: ${longitude}
+Accuracy metres: ${accuracy}
+
+Saved Audio File:
+${savedAudioFile}
+
+RAW TRANSCRIPT:
+${rawTranscript}
+
+CLEANED TRANSCRIPT:
+${analysis.cleaned_transcript || "Not available"}
+
+SUMMARY:
+${analysis.summary || "Not available"}
+
+EXTRACTED INFO:
+Name and Surname: ${analysis.name_and_surname || "Unknown"}
+Age: ${analysis.age || "Unknown"}
+Contact Number: ${analysis.contact_number || "Unknown"}
+Issue: ${analysis.what_they_are_going_through || "Unknown"}
+Duration: ${analysis.how_long_feeling_this_way || "Unknown"}
+Feels Safe Now: ${analysis.feels_safe_now || "Unknown"}
+Preferred Support: ${analysis.preferred_support || "Unknown"}
+Risk Level: ${analysis.risk_level || "Unknown"}
+Risk Flags: ${(analysis.risk_flags || []).join(", ") || "None"}
+`;
+
+        fs.writeFileSync(savedTranscriptFile, transcriptContent, "utf8");
+
+        fs.writeFileSync(
+            savedAnalysisFile,
+            JSON.stringify(
+                {
+                    date_time: new Date().toISOString(),
+                    selected_language: selectedLanguage,
+                    location: {
+                        latitude,
+                        longitude,
+                        accuracy_metres: accuracy,
+                    },
+                    saved_audio_file: savedAudioFile,
+                    raw_transcript: rawTranscript,
+                    analysis,
+                },
+                null,
+                2
+            ),
+            "utf8"
+        );
+
+        fs.unlinkSync(tempFile);
+
+        res.json({
+            success: true,
+            message: "Thank you. Your voice note has been saved.",
+        });
+    } catch (err) {
+        console.error(err);
+
+        if (tempFile && fs.existsSync(tempFile)) {
+            fs.unlinkSync(tempFile);
+        }
+
+        res.status(500).json({
+            success: false,
+            error: "Voice note could not be saved",
+            details: err.message,
+        });
+    }
+});
+
+app.post("/api/text-intake", upload.none(), async (req, res) => {
+    try {
+        ensureFolder("saved_text_intakes");
+        ensureFolder("saved_analysis");
+
+        const timestamp = getTimestamp();
+
+        const message = req.body.message || "";
+        const selectedLanguage = req.body.language || "en";
+        const latitude = req.body.latitude || "Not provided";
+        const longitude = req.body.longitude || "Not provided";
+        const accuracy = req.body.accuracy || "Not provided";
+
+        if (!message.trim()) {
+            return res.status(400).json({
+                success: false,
+                error: "No message provided",
+            });
+        }
+
+        const savedTextFile = path.join(
+            "saved_text_intakes",
+            `text-intake-${timestamp}.txt`
+        );
+
+        const savedAnalysisFile = path.join(
+            "saved_analysis",
+            `text-analysis-${timestamp}.json`
+        );
+
+        const cleanup = await openai.chat.completions.create({
+            model: "gpt-4.1-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: `
+You are an intake assistant for WannaTalk.
+
+Your job:
+- Correct obvious spelling/grammar mistakes.
+- Preserve the person's meaning.
+- Do not invent facts.
+- Do not diagnose.
+- Extract useful intake information.
+- If something is unclear, use "Unknown".
+
+Return JSON only in this exact structure:
+{
+  "detected_language": "",
+  "name_and_surname": "",
+  "age": "",
+  "contact_number": "",
+  "what_they_are_going_through": "",
+  "how_long_feeling_this_way": "",
+  "feels_safe_now": "yes | no | unknown",
+  "preferred_support": "counsellor | psychologist | psychiatrist | unknown",
+  "risk_level": "low | medium | high | urgent | unknown",
+  "risk_flags": [],
+  "cleaned_text": "",
+  "summary": "",
+  "requires_human_review": true
+}
+`
+                },
+                {
+                    role: "user",
+                    content: `
+Selected language from user: ${selectedLanguage}
+
+Typed message:
+${message}
+`
+                }
+            ],
+            response_format: { type: "json_object" },
+        });
+
+        const analysisJsonText = cleanup.choices[0].message.content;
+        let analysis;
+
+        try {
+            analysis = JSON.parse(analysisJsonText);
+        } catch {
+            analysis = {
+                error: "Could not parse analysis JSON",
+                raw_analysis: analysisJsonText,
+            };
+        }
+
+        const textContent = `
+WannaTalk Text Intake
+Date/Time: ${new Date().toISOString()}
+
+Selected Language: ${selectedLanguage}
+
+Location Consent:
+Latitude: ${latitude}
+Longitude: ${longitude}
+Accuracy metres: ${accuracy}
+
+ORIGINAL MESSAGE:
+${message}
+
+CLEANED MESSAGE:
+${analysis.cleaned_text || "Not available"}
+
+SUMMARY:
+${analysis.summary || "Not available"}
+
+EXTRACTED INFO:
+Name and Surname: ${analysis.name_and_surname || "Unknown"}
+Age: ${analysis.age || "Unknown"}
+Contact Number: ${analysis.contact_number || "Unknown"}
+Issue: ${analysis.what_they_are_going_through || "Unknown"}
+Duration: ${analysis.how_long_feeling_this_way || "Unknown"}
+Feels Safe Now: ${analysis.feels_safe_now || "Unknown"}
+Preferred Support: ${analysis.preferred_support || "Unknown"}
+Risk Level: ${analysis.risk_level || "Unknown"}
+Risk Flags: ${(analysis.risk_flags || []).join(", ") || "None"}
+`;
+
+        fs.writeFileSync(savedTextFile, textContent, "utf8");
+
+        fs.writeFileSync(
+            savedAnalysisFile,
+            JSON.stringify(
+                {
+                    date_time: new Date().toISOString(),
+                    selected_language: selectedLanguage,
+                    location: {
+                        latitude,
+                        longitude,
+                        accuracy_metres: accuracy,
+                    },
+                    original_message: message,
+                    analysis,
+                },
+                null,
+                2
+            ),
+            "utf8"
+        );
+
+        res.json({
+            success: true,
+            message: "Thank you. Your message has been saved.",
+        });
+    } catch (err) {
+        console.error(err);
+
+        res.status(500).json({
+            success: false,
+            error: "Text intake could not be saved",
+            details: err.message,
+        });
+    }
+});
+
+app.listen(3001, "0.0.0.0", () => {
+    console.log("WannaTalk test running at http://0.0.0.0:3001");
+});
