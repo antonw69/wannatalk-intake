@@ -706,30 +706,6 @@
 
             <section class="acknowledgement">
 
-                <h3>PROVIDER ELECTRONIC SIGNATURE</h3>
-
-                <p>
-                    Please type your full legal name below as your electronic signature.
-                    By entering your name, you confirm that the information supplied by you
-                    is true and correct and that you intend your electronic signature to
-                    have the same force and effect as a handwritten signature in terms of
-                    applicable South African legislation, including the Electronic
-                    Communications and Transactions Act, 2002.
-                </p>
-
-                <input type="text"
-                       id="provider_signature"
-                       name="provider_signature"
-                       required
-                       placeholder="Enter Full Name"
-                       style="
-            width:100%;
-            padding:14px;
-            border:1px solid #dbe7e5;
-            border-radius:12px;
-            font-size:15px;
-            margin-bottom:20px;
-        " />
 
                 <div class="checkbox-row">
 
@@ -755,7 +731,7 @@
 
                 </div>
 
-                
+
                 <input type="hidden"
                        name="provider_type"
                        id="provider_type" />
@@ -822,66 +798,97 @@
     </main>
 
     <script>const checkbox = document.getElementById('accept_terms');
-const submitBtn = document.getElementById('submitBtn');
-const statusText = document.getElementById('status');
-const acceptedAt = document.getElementById('accepted_at');
-const form = document.getElementById('consentForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const statusText = document.getElementById('status');
+      const acceptedAt = document.getElementById('accepted_at');
+      const form = document.getElementById('consentForm');
+      const termsBox = document.getElementById('termsBox');
 
-document.getElementById('user_agent').value = navigator.userAgent;
+      document.getElementById('user_agent').value = navigator.userAgent;
 
-checkbox.addEventListener('change', function () {
+      function notifyConsentAccepted() {
+        console.log('Submit Acceptance clicked');
+        window.parent.postMessage(
+          {
+            type: 'CONSENT_ACCEPTED'
+          },
+          '*'
+        );
+      }
 
-    submitBtn.disabled = !this.checked;
+      function setConsentGate(open) {
+        checkbox.disabled = !open;
 
-    statusText.textContent = this.checked
-        ? 'Ready to submit.'
-        : 'Tick the checkbox to continue.';
+        if (!open) {
+          checkbox.checked = false;
+          submitBtn.disabled = true;
+          acceptedAt.value = '';
+          statusText.textContent =
+            'Scroll to the end of the provider terms to enable acceptance.';
+          statusText.className = 'status';
+        }
+      }
 
-    statusText.className = this.checked
-        ? 'status success'
-        : 'status';
+      if (submitBtn) {
+        submitBtn.addEventListener('click', function () {
+          notifyConsentAccepted();
+        });
+      }
 
-    acceptedAt.value = this.checked
-        ? new Date().toISOString()
-        : '';
+      setConsentGate(false);
 
-});
+      termsBox.addEventListener('scroll', function () {
+        const threshold = 16;
+        const scrolledToEnd =
+          termsBox.scrollTop + termsBox.clientHeight >= termsBox.scrollHeight - threshold;
 
-form.addEventListener('submit', function (event) {
+        if (scrolledToEnd) {
+          setConsentGate(true);
+          statusText.textContent = 'You may now accept the provider consent.';
+          statusText.className = 'status success';
+        }
+      });
 
-    if (!checkbox.checked) {
+      checkbox.addEventListener('change', function () {
+        submitBtn.disabled = !this.checked;
+        statusText.textContent = this.checked
+          ? 'Ready to submit.'
+          : 'Tick the checkbox to continue.';
+        statusText.className = this.checked
+          ? 'status success'
+          : 'status';
+        acceptedAt.value = this.checked
+          ? new Date().toISOString()
+          : '';
+      });
 
-        event.preventDefault();
-
-        statusText.textContent =
+      form.addEventListener('submit', function (event) {
+        if (!checkbox.checked) {
+          event.preventDefault();
+          statusText.textContent =
             'You must accept the acknowledgement and terms before submitting.';
+          statusText.className = 'status';
+          return;
+        }
 
-        statusText.className = 'status';
+        acceptedAt.value = new Date().toISOString();
 
-        return;
+        /*
+          Recommended backend storage:
 
-    }
-
-    acceptedAt.value = new Date().toISOString();
-
-    /*
-        Recommended backend storage:
-
-        provider_id
-        provider_type
-        provider_sub_type
-        hpcsa_number
-        practice_number
-        facility_name
-        document_version
-        accepted_at
-        ip_address
-        user_agent
-        document_hash
-
-    */
-
-});</script>
+          provider_id
+          provider_type
+          provider_sub_type
+          hpcsa_number
+          practice_number
+          facility_name
+          document_version
+          accepted_at
+          ip_address
+          user_agent
+          document_hash
+        */
+      });</script>
 
 </body>
 </html>
