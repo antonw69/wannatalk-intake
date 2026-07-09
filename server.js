@@ -594,6 +594,7 @@ async function saveIntakeToDatabase({
   transcriptFile,
 
   analysisFile,
+  age,
 }) {
   try {
     const referenceNumber = "WT-" + Date.now();
@@ -671,7 +672,9 @@ async function saveIntakeToDatabase({
 
     strengths_identified,
 
-    reference_number
+    reference_number,
+    
+    age
       )
 
       VALUES (
@@ -755,6 +758,8 @@ async function saveIntakeToDatabase({
         JSON.stringify(analysis.strengths_identified || []),
 
         referenceNumber,
+
+        age,
       ],
     );
   } catch (err) {
@@ -916,6 +921,8 @@ Keywords: ${(analysis.keywords || []).join(", ") || "None"}
       transcriptFile: savedTranscriptFile,
 
       analysisFile: savedAnalysisFile,
+
+      age,
     });
 
     console.log("STEP 4: database saved");
@@ -945,6 +952,7 @@ Keywords: ${(analysis.keywords || []).join(", ") || "None"}
       audioFile: null,
       transcriptFile: savedTextFile,
       analysisFile: savedAnalysisFile,
+      age,
     });
     res.status(500).json({
       success: false,
@@ -1085,6 +1093,8 @@ ${analysis.summary || "Not available"}
       transcriptFile: savedTextFile,
 
       analysisFile: savedAnalysisFile,
+
+      age,
     });
 
     res.json({
