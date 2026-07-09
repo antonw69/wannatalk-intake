@@ -815,7 +815,7 @@
     <div class="bg-grid"></div>
     <main class="shell">
         <section class="phone" aria-label="WannaTalk Intake">
-            <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+            <div class="statusbar"><span id="currentTime">9:41</span><span>●●●</span></div>
             <div id="screen1" class="screen active">
                 <div class="topnav">
                     <div class="logo">
@@ -1365,6 +1365,21 @@
         submitVoiceBtn.addEventListener('click', async () => { if (!recordedBlob) { alert('Please record something first.'); return; } try { showScreen(8); const actualMimeType = recordedBlob.type || 'audio/webm'; const extension = actualMimeType.includes('mp4') ? 'm4a' : 'webm'; const formData = new FormData(); formData.append('audio', recordedBlob, `voice.${extension}`); formData.append('language', selectedLanguage()); formData.append('age_range', ageRangeInput.value); formData.append('name_and_surname', fullNameInput.value); formData.append('contact_number', contactNumberInput.value); formData.append('email', emailInput.value); formData.append('mode', 'voice'); formData.append('consent_to_process', 'true'); formData.append('consent_to_contact', 'true'); formData.append('terms_accepted', 'true'); formData.append('terms_version', '1.0'); const location = await getLocationData(); if (location) { formData.append('latitude', location.latitude); formData.append('longitude', location.longitude); formData.append('accuracy', location.accuracy); } const response = await fetch('/transcribe', { method: 'POST', body: formData }); const result = await response.json(); if (result.success) { updateSuccessState({ ...result, mode: 'voice', language: selectedLanguage(), name_and_surname: fullNameInput.value }); showScreen(9); } else { alert(result.error || 'Something went wrong.'); showScreen(7); } } catch (err) { console.error(err); alert('Voice note upload failed.'); showScreen(7); } });
         submitTextBtn.addEventListener('click', async () => { if (!consent.checked) { alert('Please accept consent first.'); return; } const typedMessage = $('typedMessage').value; if (!typedMessage.trim()) { alert('Please type a message.'); return; } showScreen(8); const payload = { text: typedMessage, language: selectedLanguage(), age_range: ageRangeInput.value, name_and_surname: fullNameInput.value, contact_number: contactNumberInput.value, email: emailInput.value, mode: 'text', consent_to_process: true, consent_to_contact: true, terms_accepted: true, terms_version: '1.0' }; const location = await getLocationData(); if (location) { payload.latitude = location.latitude; payload.longitude = location.longitude; payload.accuracy = location.accuracy; } try { const response = await fetch('/save-text-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); const result = await response.json(); if (result.success) { $('typedMessage').value = ''; updateSuccessState({ ...result, mode: 'text', language: selectedLanguage(), name_and_surname: fullNameInput.value }); showScreen(9); } else { alert(result.error || 'Something went wrong.'); showScreen(5); } } catch (err) { console.error(err); alert('Message submission failed.'); showScreen(5); } });
         updateTimer(); updateContinueState(); selectMode('voice');
+
+        function updateTime() {
+            const now = new Date();
+
+            const time = now.toLocaleTimeString([], {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true // Set to false for 24-hour format
+            });
+
+            document.getElementById('currentTime').textContent = time;
+        }
+
+        updateTime();               // Set immediately
+        setInterval(updateTime, 1000); // Update every second
     </script>
 </body>
 
