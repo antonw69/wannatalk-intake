@@ -14,7 +14,7 @@ import path from "path";
 
 import dotenv from "dotenv";
 
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 
 import pkg from "pg";
 
@@ -39,8 +39,8 @@ app.use(
 );
 
 const upload = multer({ dest: "uploads/" });
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
 });
 
 const pool = new Pool({
@@ -92,8 +92,8 @@ function requireAdmin(req, res, next) {
 }
 
 async function analyseIntake({ selectedLanguage, rawText, intakeType }) {
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const completion = await groq.chat.completions.create({
+    model: "openai/gpt-oss-120b",
     messages: [
       {
         role: "system",
@@ -815,9 +815,10 @@ app.post("/transcribe", upload.single("audio"), async (req, res) => {
     fs.copyFileSync(tempFile, savedAudioFile);
     console.log("STEP 1: file saved");
 
-    const transcription = await openai.audio.transcriptions.create({
+    // FIXED: Changed from openai to groq
+    const transcription = await groq.audio.transcriptions.create({
       file: fs.createReadStream(tempFile),
-      model: "gpt-4o-mini-transcribe",
+      model: "whisper-large-v3-turbo",
       language: selectedLanguage,
       response_format: "json",
     });
@@ -1262,7 +1263,7 @@ app.get("/api/admin/patient-intakes", requireAdmin, async (req, res) => {
         reviewer_considerations,
         administrative_next_steps,
         cleaned_text,
-        raw_text,
+        raw_text
       FROM patient_intakes
       ORDER BY created_at DESC
       LIMIT 100
