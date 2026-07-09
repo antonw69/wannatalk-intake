@@ -685,7 +685,8 @@ async function saveIntakeToDatabase({
 
         $27,$28,$29,$30,$31,$32,$33,
 
-        $34
+        $34,
+$35
       )
     RETURNING id
       `,
