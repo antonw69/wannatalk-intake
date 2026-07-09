@@ -25,31 +25,26 @@ dotenv.config();
 const app = express();
 
 app.use(
+  cors({
+    origin: [
+      "https://dashboard.wannatalk.co.za",
 
-    cors({
+      "https://intake.wannatalk.co.za",
 
-        origin: [
+      "http://localhost:3000",
 
-            "https://dashboard.wannatalk.co.za",
-
-            "https://intake.wannatalk.co.za",
-
-            "http://localhost:3000",
-
-            "http://localhost:4200"
-        ],
-
-    })
-
+      "http://localhost:4200",
+    ],
+  }),
 );
 
 const upload = multer({ dest: "uploads/" });
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL,
 });
 
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
@@ -60,49 +55,49 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 function getTimestamp() {
-    return new Date().toISOString().replace(/[:.]/g, "-");
+  return new Date().toISOString().replace(/[:.]/g, "-");
 }
 
 function ensureFolder(folder) {
-    if (!fs.existsSync(folder)) {
-        fs.mkdirSync(folder, { recursive: true });
-    }
+  if (!fs.existsSync(folder)) {
+    fs.mkdirSync(folder, { recursive: true });
+  }
 }
 
 function ensureStorageFolders() {
-    ensureFolder("uploads");
-    ensureFolder("saved_voice_notes");
-    ensureFolder("saved_transcripts");
-    ensureFolder("saved_analysis");
-    ensureFolder("saved_text_intakes");
+  ensureFolder("uploads");
+  ensureFolder("saved_voice_notes");
+  ensureFolder("saved_transcripts");
+  ensureFolder("saved_analysis");
+  ensureFolder("saved_text_intakes");
 }
 
 function requireAdmin(req, res, next) {
-    const auth = req.headers.authorization;
+  const auth = req.headers.authorization;
 
-    if (!auth || !auth.startsWith("Basic ")) {
-        res.setHeader("WWW-Authenticate", "Basic realm=\"WannaTalk Admin\"");
-        return res.status(401).send("Authentication required");
-    }
+  if (!auth || !auth.startsWith("Basic ")) {
+    res.setHeader("WWW-Authenticate", 'Basic realm="WannaTalk Admin"');
+    return res.status(401).send("Authentication required");
+  }
 
-    const base64 = auth.replace("Basic ", "");
-    const decoded = Buffer.from(base64, "base64").toString("utf8");
-    const [username, password] = decoded.split(":");
+  const base64 = auth.replace("Basic ", "");
+  const decoded = Buffer.from(base64, "base64").toString("utf8");
+  const [username, password] = decoded.split(":");
 
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
-        return next();
-    }
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    return next();
+  }
 
-    return res.status(403).send("Invalid login");
+  return res.status(403).send("Invalid login");
 }
 
 async function analyseIntake({ selectedLanguage, rawText, intakeType }) {
-    const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-            {
-                role: "system",
-                content: `
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: `
 You are an intake assistant for WannaTalk.
 
 Rules:
@@ -498,120 +493,113 @@ Return this exact JSON structure:
 
     "requires_human_review": false
 }
-`
-            },
-            {
-                role: "user",
-                content: `
+`,
+      },
+      {
+        role: "user",
+        content: `
 Selected language: ${selectedLanguage}
 Intake type: ${intakeType}
 
 Text:
 ${rawText}
-`
-            }
-        ],
-        temperature: 0.2,
-        response_format: { type: "json_object" },
-    });
+`,
+      },
+    ],
+    temperature: 0.2,
+    response_format: { type: "json_object" },
+  });
 
-    try {
-        return JSON.parse(completion.choices[0].message.content || "{}");
-    } catch {
-        return {
-            detected_language: selectedLanguage,
+  try {
+    return JSON.parse(completion.choices[0].message.content || "{}");
+  } catch {
+    return {
+      detected_language: selectedLanguage,
 
-            intake_type: intakeType,
+      intake_type: intakeType,
 
-            help_request_detected: false,
+      help_request_detected: false,
 
-            intake_validity: "unclear",
+      intake_validity: "unclear",
 
-            engagement_type: "unclear",
+      engagement_type: "unclear",
 
-            confidence_score: 0,
+      confidence_score: 0,
 
-            cleaned_text: rawText,
+      cleaned_text: rawText,
 
-            summary: "Analysis unavailable",
+      summary: "Analysis unavailable",
 
-            what_they_are_going_through: "",
+      what_they_are_going_through: "",
 
-            how_long_feeling_this_way: "",
+      how_long_feeling_this_way: "",
 
-            feels_safe_now: "unknown",
+      feels_safe_now: "unknown",
 
-            preferred_support: "unknown",
+      preferred_support: "unknown",
 
-            risk_level: "unknown",
+      risk_level: "unknown",
 
-            risk_flags: [],
+      risk_flags: [],
 
-            presenting_concerns: [],
+      presenting_concerns: [],
 
-            emotions_detected: [],
+      emotions_detected: [],
 
-            background_factors: [],
+      background_factors: [],
 
-            risk_factors: [],
+      risk_factors: [],
 
-            protective_factors: [],
+      protective_factors: [],
 
-            strengths_identified: [],
+      strengths_identified: [],
 
-            reviewer_considerations: [],
+      reviewer_considerations: [],
 
-            administrative_next_steps: [],
+      administrative_next_steps: [],
 
-            themes: [],
+      themes: [],
 
-            keywords: [],
+      keywords: [],
 
-            requires_human_review: true
-        };
-    }
+      requires_human_review: true,
+    };
+  }
 }
 async function saveIntakeToDatabase({
+  intakeType,
 
-    intakeType,
+  nameAndSurname,
 
-    nameAndSurname,
+  contactNumber,
 
-    contactNumber,
+  email,
 
-    email,
+  consentToProcess,
 
-    consentToProcess,
+  consentToContact,
 
-    consentToContact,
+  termsAccepted,
 
-    termsAccepted,
+  termsVersion,
 
-    termsVersion,
+  selectedLanguage,
 
-    selectedLanguage,
+  rawText,
 
-    rawText,
+  analysis,
 
-    analysis,
+  audioFile,
 
-    audioFile,
+  transcriptFile,
 
-    transcriptFile,
-
-    analysisFile
-
+  analysisFile,
 }) {
+  try {
+    const referenceNumber = "WT-" + Date.now();
 
-    try {
-
-        const referenceNumber =
-
-            "WT-" + Date.now();
-
-        const result = await pool.query(
-
-            `
+    const result = await pool.query(
+      `
 
       INSERT INTO patient_intakes (
 
@@ -699,150 +687,148 @@ async function saveIntakeToDatabase({
     RETURNING id
       `,
 
-            [
+      [
+        nameAndSurname,
 
-                nameAndSurname,
+        contactNumber,
 
-                contactNumber,
+        email,
 
-                email,
+        consentToProcess,
 
-                consentToProcess,
+        consentToContact,
 
-                consentToContact,
+        termsAccepted,
 
-                termsAccepted,
+        termsVersion,
 
-                termsVersion,
+        intakeType,
 
-                intakeType,
+        selectedLanguage,
 
-                selectedLanguage,
+        rawText,
 
-                rawText,
+        analysis.cleaned_text || null,
 
-                analysis.cleaned_text || null,
+        analysis.summary || null,
 
-                analysis.summary || null,
+        analysis.preferred_support || null,
 
-                analysis.preferred_support || null,
+        analysis.feels_safe_now || null,
 
-                analysis.feels_safe_now || null,
+        analysis.risk_level || null,
 
-                analysis.risk_level || null,
+        JSON.stringify(analysis.risk_flags || []),
 
-                JSON.stringify(analysis.risk_flags || []),
+        JSON.stringify(analysis.themes || []),
 
-                JSON.stringify(analysis.themes || []),
+        JSON.stringify(analysis.keywords || []),
 
-                JSON.stringify(analysis.keywords || []),
+        audioFile || null,
 
-                audioFile || null,
+        transcriptFile || null,
 
-                transcriptFile || null,
+        analysisFile || null,
 
-                analysisFile || null,
+        JSON.stringify(analysis.presenting_concerns || []),
 
-                JSON.stringify(analysis.presenting_concerns || []),
+        JSON.stringify(analysis.risk_factors || []),
 
-                JSON.stringify(analysis.risk_factors || []),
+        JSON.stringify(analysis.protective_factors || []),
 
-                JSON.stringify(analysis.protective_factors || []),
+        JSON.stringify(analysis.reviewer_considerations || []),
 
-                JSON.stringify(analysis.reviewer_considerations || []),
+        JSON.stringify(analysis.administrative_next_steps || []),
 
-                JSON.stringify(analysis.administrative_next_steps || []),
+        analysis.help_request_detected ?? false,
 
-                analysis.help_request_detected ?? false,
+        analysis.intake_validity || "unclear",
 
-                analysis.intake_validity || "unclear",
+        analysis.engagement_type || "unclear",
 
-                analysis.engagement_type || "unclear",
+        analysis.confidence_score || 0,
 
-                analysis.confidence_score || 0,
+        JSON.stringify(analysis.emotions_detected || []),
 
-                JSON.stringify(analysis.emotions_detected || []),
+        JSON.stringify(analysis.background_factors || []),
 
-                JSON.stringify(analysis.background_factors || []),
+        JSON.stringify(analysis.strengths_identified || []),
 
-                JSON.stringify(analysis.strengths_identified || []),
-
-                referenceNumber
-
-            ]
-
-        );
-
-    } catch (err) {
-
-        console.error("Database save error:", err);
-
-    }
-
+        referenceNumber,
+      ],
+    );
+  } catch (err) {
+    console.error("Database save error:", err);
+  }
 }
 app.post("/transcribe", upload.single("audio"), async (req, res) => {
-    let tempFile;
+  let tempFile;
 
-    try {
-        ensureStorageFolders();
+  try {
+    ensureStorageFolders();
 
-        if (!req.file) {
-            return res.status(400).json({ success: false, error: "No audio file uploaded" });
-        }
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, error: "No audio file uploaded" });
+    }
 
-        const timestamp = getTimestamp();
-        const selectedLanguage = req.body.language || "en";
-        const nameAndSurname = req.body.name_and_surname || "Unknown";
-        const contactNumber = req.body.contact_number || "Unknown";
-        const email = req.body.email || null;
+    const timestamp = getTimestamp();
+    const selectedLanguage = req.body.language || "en";
+    const nameAndSurname = req.body.name_and_surname || "Unknown";
+    const contactNumber = req.body.contact_number || "Unknown";
+    const email = req.body.email || null;
+    const age = req.body.age_range || null;
 
-        const consentToProcess =
+    const consentToProcess = req.body.consent_to_process === "true";
 
-            req.body.consent_to_process === "true";
+    const consentToContact = req.body.consent_to_contact === "true";
 
-        const consentToContact =
+    const termsAccepted = req.body.terms_accepted === "true";
 
-            req.body.consent_to_contact === "true";
+    const termsVersion = req.body.terms_version || "1.0";
+    const originalExt =
+      path.extname(req.file.originalname || "").toLowerCase() || ".webm";
 
-        const termsAccepted =
+    tempFile = req.file.path + originalExt;
 
-            req.body.terms_accepted === "true";
+    const savedAudioFile = path.join(
+      "saved_voice_notes",
+      `voice-note-${timestamp}.webm`,
+    );
+    const savedTranscriptFile = path.join(
+      "saved_transcripts",
+      `transcript-${timestamp}.txt`,
+    );
+    const savedAnalysisFile = path.join(
+      "saved_analysis",
+      `analysis-${timestamp}.json`,
+    );
 
-        const termsVersion =
+    fs.renameSync(req.file.path, tempFile);
+    fs.copyFileSync(tempFile, savedAudioFile);
+    console.log("STEP 1: file saved");
 
-            req.body.terms_version || "1.0";
-        const originalExt = path.extname(req.file.originalname || "").toLowerCase() || ".webm";
+    const transcription = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(tempFile),
+      model: "gpt-4o-mini-transcribe",
+      language: selectedLanguage,
+      response_format: "json",
+    });
+    console.log("STEP 2: transcription complete");
+    console.log("Transcript length:", (transcription.text || "").length);
 
-        tempFile = req.file.path + originalExt;
+    const rawTranscript = transcription.text || "";
 
-        const savedAudioFile = path.join("saved_voice_notes", `voice-note-${timestamp}.webm`);
-        const savedTranscriptFile = path.join("saved_transcripts", `transcript-${timestamp}.txt`);
-        const savedAnalysisFile = path.join("saved_analysis", `analysis-${timestamp}.json`);
+    const analysis = await analyseIntake({
+      selectedLanguage,
+      rawText: rawTranscript,
+      intakeType: "voice",
+    });
+    console.log("STEP 3: analysis complete");
+    console.log("Transcript length:", (transcription.text || "").length);
 
-        fs.renameSync(req.file.path, tempFile);
-        fs.copyFileSync(tempFile, savedAudioFile);
-        console.log("STEP 1: file saved");
-
-        const transcription = await openai.audio.transcriptions.create({
-            file: fs.createReadStream(tempFile),
-            model: "gpt-4o-mini-transcribe",
-            language: selectedLanguage,
-            response_format: "json",
-        });
-        console.log("STEP 2: transcription complete");
-        console.log("Transcript length:", (transcription.text || "").length);
-
-        const rawTranscript = transcription.text || "";
-
-        const analysis = await analyseIntake({
-            selectedLanguage,
-            rawText: rawTranscript,
-            intakeType: "voice",
-        });
-        console.log("STEP 3: analysis complete");
-        console.log("Transcript length:", (transcription.text || "").length);
-
-        const transcriptContent = `
+    const transcriptContent = `
 WannaTalk Voice Intake
 Date/Time: ${new Date().toISOString()}
 
@@ -851,6 +837,9 @@ ${nameAndSurname}
 
 Contact Number:
 ${contactNumber}
+
+Age Range:
+${age}
 
 Selected Language:
 ${selectedLanguage}
@@ -878,143 +867,140 @@ Themes: ${(analysis.themes || []).join(", ") || "None"}
 Keywords: ${(analysis.keywords || []).join(", ") || "None"}
 `;
 
-        fs.writeFileSync(savedTranscriptFile, transcriptContent, "utf8");
+    fs.writeFileSync(savedTranscriptFile, transcriptContent, "utf8");
 
-        fs.writeFileSync(
-            savedAnalysisFile,
-            JSON.stringify(
-                {
-                    date_time: new Date().toISOString(),
-                    intake_type: "voice",
-                    name_and_surname: nameAndSurname,
-                    contact_number: contactNumber,
-                    selected_language: selectedLanguage,
-                    saved_audio_file: savedAudioFile,
-                    saved_transcript_file: savedTranscriptFile,
-                    raw_transcript: rawTranscript,
-                    analysis,
-                },
-                null,
-                2
-            ),
-            "utf8"
-        );
-        await saveIntakeToDatabase({
+    fs.writeFileSync(
+      savedAnalysisFile,
+      JSON.stringify(
+        {
+          date_time: new Date().toISOString(),
+          intake_type: "voice",
+          name_and_surname: nameAndSurname,
+          contact_number: contactNumber,
+          selected_language: selectedLanguage,
+          saved_audio_file: savedAudioFile,
+          saved_transcript_file: savedTranscriptFile,
+          raw_transcript: rawTranscript,
+          analysis,
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+    await saveIntakeToDatabase({
+      intakeType: "voice",
 
-            intakeType: "voice",
+      nameAndSurname,
 
-            nameAndSurname,
+      contactNumber,
 
-            contactNumber,
+      email,
 
-            email,
+      consentToProcess,
 
-            consentToProcess,
+      consentToContact,
 
-            consentToContact,
+      termsAccepted,
 
-            termsAccepted,
+      termsVersion,
 
-            termsVersion,
+      selectedLanguage,
 
-            selectedLanguage,
+      rawText: rawTranscript,
 
-            rawText: rawTranscript,
+      analysis,
 
-            analysis,
+      audioFile: savedAudioFile,
 
-            audioFile: savedAudioFile,
+      transcriptFile: savedTranscriptFile,
 
-            transcriptFile: savedTranscriptFile,
+      analysisFile: savedAnalysisFile,
+    });
 
-            analysisFile: savedAnalysisFile
+    console.log("STEP 4: database saved");
+    if (tempFile && fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
+    console.log("STEP 5: temp file deleted");
 
-        });
+    console.log("STEP 6: returning success");
 
-        console.log("STEP 4: database saved");
-        if (tempFile && fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
-        console.log("STEP 5: temp file deleted");
+    res.json({
+      success: true,
+      message: "Thank you. Your voice note has been saved.",
+      audioFile: path.basename(savedAudioFile),
+      transcriptFile: path.basename(savedTranscriptFile),
+      analysisFile: path.basename(savedAnalysisFile),
+    });
+  } catch (err) {
+    console.error(err);
 
-        console.log("STEP 6: returning success");
-
-        res.json({
-            success: true,
-            message: "Thank you. Your voice note has been saved.",
-            audioFile: path.basename(savedAudioFile),
-            transcriptFile: path.basename(savedTranscriptFile),
-            analysisFile: path.basename(savedAnalysisFile),
-        });
-    } catch (err) {
-        console.error(err);
-
-        if (tempFile && fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
-        await saveIntakeToDatabase({
-            intakeType: "text",
-            nameAndSurname,
-            contactNumber,
-            selectedLanguage,
-            rawText: message,
-            analysis,
-            audioFile: null,
-            transcriptFile: savedTextFile,
-            analysisFile: savedAnalysisFile
-        });
-        res.status(500).json({
-            success: false,
-            error: "Voice note could not be saved",
-            details: err.message,
-        });
-    }
+    if (tempFile && fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
+    await saveIntakeToDatabase({
+      intakeType: "text",
+      nameAndSurname,
+      contactNumber,
+      selectedLanguage,
+      rawText: message,
+      analysis,
+      audioFile: null,
+      transcriptFile: savedTextFile,
+      analysisFile: savedAnalysisFile,
+    });
+    res.status(500).json({
+      success: false,
+      error: "Voice note could not be saved",
+      details: err.message,
+    });
+  }
 });
 console.log("STEP 5: returning success");
 
 app.post("/save-text-intake", async (req, res) => {
-    try {
-        ensureStorageFolders();
+  try {
+    ensureStorageFolders();
 
-        const timestamp = getTimestamp();
-        const message = req.body.text || req.body.message || "";
-        const selectedLanguage = req.body.language || "en";
-        const nameAndSurname = req.body.name_and_surname || "Unknown";
-        const contactNumber = req.body.contact_number || "Unknown";
-        const email = req.body.email || null;
+    const timestamp = getTimestamp();
+    const message = req.body.text || req.body.message || "";
+    const selectedLanguage = req.body.language || "en";
+    const nameAndSurname = req.body.name_and_surname || "Unknown";
+    const contactNumber = req.body.contact_number || "Unknown";
+    const email = req.body.email || null;
+    const age = req.body.age_range || null;
+    const consentToProcess =
+      req.body.consent_to_process === true ||
+      req.body.consent_to_process === "true";
 
-        const consentToProcess =
+    const consentToContact =
+      req.body.consent_to_contact === true ||
+      req.body.consent_to_contact === "true";
 
-            req.body.consent_to_process === true ||
+    const termsAccepted =
+      req.body.terms_accepted === true || req.body.terms_accepted === "true";
 
-            req.body.consent_to_process === "true";
+    const termsVersion = req.body.terms_version || "1.0";
 
-        const consentToContact =
+    if (!message.trim()) {
+      return res
+        .status(400)
+        .json({ success: false, error: "No message provided" });
+    }
 
-            req.body.consent_to_contact === true ||
+    const savedTextFile = path.join(
+      "saved_text_intakes",
+      `text-intake-${timestamp}.txt`,
+    );
+    const savedAnalysisFile = path.join(
+      "saved_analysis",
+      `text-analysis-${timestamp}.json`,
+    );
 
-            req.body.consent_to_contact === "true";
+    const analysis = await analyseIntake({
+      selectedLanguage,
+      rawText: message,
+      intakeType: "text",
+    });
 
-        const termsAccepted =
-
-            req.body.terms_accepted === true ||
-
-            req.body.terms_accepted === "true";
-
-        const termsVersion =
-
-            req.body.terms_version || "1.0";
-
-        if (!message.trim()) {
-            return res.status(400).json({ success: false, error: "No message provided" });
-        }
-
-        const savedTextFile = path.join("saved_text_intakes", `text-intake-${timestamp}.txt`);
-        const savedAnalysisFile = path.join("saved_analysis", `text-analysis-${timestamp}.json`);
-
-        const analysis = await analyseIntake({
-            selectedLanguage,
-            rawText: message,
-            intakeType: "text",
-        });
-
-        const textContent = `
+    const textContent = `
 WannaTalk Text Intake
 Date/Time: ${new Date().toISOString()}
 
@@ -1023,6 +1009,9 @@ ${nameAndSurname}
 
 Contact Number:
 ${contactNumber}
+
+Age Range:
+${age}
 
 Selected Language:
 ${selectedLanguage}
@@ -1037,100 +1026,93 @@ SUMMARY:
 ${analysis.summary || "Not available"}
 `;
 
-        fs.writeFileSync(savedTextFile, textContent, "utf8");
+    fs.writeFileSync(savedTextFile, textContent, "utf8");
 
-        fs.writeFileSync(
-            savedAnalysisFile,
-            JSON.stringify(
-                {
+    fs.writeFileSync(
+      savedAnalysisFile,
+      JSON.stringify(
+        {
+          date_time: new Date().toISOString(),
 
-                    date_time: new Date().toISOString(),
+          intake_type: "text",
 
-                    intake_type: "text",
+          name_and_surname: nameAndSurname,
 
-                    name_and_surname: nameAndSurname,
+          contact_number: contactNumber,
 
-                    contact_number: contactNumber,
+          selected_language: selectedLanguage,
 
-                    selected_language: selectedLanguage,
+          saved_text_file: savedTextFile,
 
-                    saved_text_file: savedTextFile,
+          original_message: message,
 
-                    original_message: message,
+          analysis,
+        },
 
-                    analysis,
+        null,
 
-                },
+        2,
+      ),
 
-                null,
+      "utf8",
+    );
 
-                2
+    await saveIntakeToDatabase({
+      intakeType: "text",
 
-            ),
+      nameAndSurname,
 
-            "utf8"
+      contactNumber,
 
-        );
+      email,
 
-        await saveIntakeToDatabase({
+      consentToProcess,
 
-            intakeType: "text",
+      consentToContact,
 
-            nameAndSurname,
+      termsAccepted,
 
-            contactNumber,
+      termsVersion,
 
-            email,
+      selectedLanguage,
 
-            consentToProcess,
+      rawText: message,
 
-            consentToContact,
+      analysis,
 
-            termsAccepted,
+      audioFile: null,
 
-            termsVersion,
+      transcriptFile: savedTextFile,
 
-            selectedLanguage,
+      analysisFile: savedAnalysisFile,
+    });
 
-            rawText: message,
+    res.json({
+      success: true,
 
-            analysis,
+      message: "Thank you. Your message has been saved.",
 
-            audioFile: null,
+      textFile: path.basename(savedTextFile),
 
-            transcriptFile: savedTextFile,
+      analysisFile: path.basename(savedAnalysisFile),
+    });
+  } catch (err) {
+    console.error(err);
 
-            analysisFile: savedAnalysisFile
-
-        });
-
-        res.json({
-
-            success: true,
-
-            message: "Thank you. Your message has been saved.",
-
-            textFile: path.basename(savedTextFile),
-
-            analysisFile: path.basename(savedAnalysisFile),
-        });
-    } catch (err) {
-        console.error(err);
-
-        res.status(500).json({
-            success: false,
-            error: "Text intake could not be saved",
-            details: err.message,
-        });
-    }
+    res.status(500).json({
+      success: false,
+      error: "Text intake could not be saved",
+      details: err.message,
+    });
+  }
 });
 
 app.post("/api/patient-intake", async (req, res) => {
-    try {
-        const data = req.body;
+  try {
+    const data = req.body;
 
-        const result = await pool.query(
-            `
+    const result = await pool.query(
+      `
       INSERT INTO patient_intakes (
         full_name,
         contact_number,
@@ -1155,97 +1137,104 @@ app.post("/api/patient-intake", async (req, res) => {
       )
       RETURNING id, created_at
       `,
-            [
-                data.full_name || null,
-                data.contact_number || null,
-                data.email || null,
-                data.id_number || null,
-                data.date_of_birth || null,
-                data.age || null,
-                data.emergency_contact_name || null,
-                data.emergency_contact_number || null,
-                data.preferred_support || null,
-                data.current_concerns || null,
-                data.duration || null,
-                data.feels_safe_now || null,
-                data.medical_history || null,
-                data.medication || null,
-                data.consent_to_process === true || data.consent_to_process === "true",
-                data.consent_to_contact === true || data.consent_to_contact === "true",
-                data
-            ]
-        );
+      [
+        data.full_name || null,
+        data.contact_number || null,
+        data.email || null,
+        data.id_number || null,
+        data.date_of_birth || null,
+        data.age || null,
+        data.emergency_contact_name || null,
+        data.emergency_contact_number || null,
+        data.preferred_support || null,
+        data.current_concerns || null,
+        data.duration || null,
+        data.feels_safe_now || null,
+        data.medical_history || null,
+        data.medication || null,
+        data.consent_to_process === true || data.consent_to_process === "true",
+        data.consent_to_contact === true || data.consent_to_contact === "true",
+        data,
+      ],
+    );
 
-        res.json({
-            success: true,
-            message: "Patient intake saved successfully",
-            intake_id: result.rows[0].id,
-            created_at: result.rows[0].created_at
-        });
-    } catch (err) {
-        console.error("Patient intake save error:", err);
+    res.json({
+      success: true,
+      message: "Patient intake saved successfully",
+      intake_id: result.rows[0].id,
+      created_at: result.rows[0].created_at,
+    });
+  } catch (err) {
+    console.error("Patient intake save error:", err);
 
-        res.status(500).json({
-            success: false,
-            error: "Could not save patient intake",
-            details: err.message
-        });
-    }
+    res.status(500).json({
+      success: false,
+      error: "Could not save patient intake",
+      details: err.message,
+    });
+  }
 });
 
 app.get("/api/admin/submissions", requireAdmin, (req, res) => {
-    try {
-        ensureStorageFolders();
+  try {
+    ensureStorageFolders();
 
-        const audioFiles = fs.readdirSync("saved_voice_notes")
-            .filter(file => file.endsWith(".webm"))
-            .sort()
-            .reverse();
+    const audioFiles = fs
+      .readdirSync("saved_voice_notes")
+      .filter((file) => file.endsWith(".webm"))
+      .sort()
+      .reverse();
 
-        const transcriptFiles = fs.readdirSync("saved_transcripts")
-            .filter(file => file.endsWith(".txt"));
+    const transcriptFiles = fs
+      .readdirSync("saved_transcripts")
+      .filter((file) => file.endsWith(".txt"));
 
-        const analysisFiles = fs.readdirSync("saved_analysis")
-            .filter(file => file.endsWith(".json"));
+    const analysisFiles = fs
+      .readdirSync("saved_analysis")
+      .filter((file) => file.endsWith(".json"));
 
-        const textFiles = fs.readdirSync("saved_text_intakes")
-            .filter(file => file.endsWith(".txt"))
-            .sort()
-            .reverse();
+    const textFiles = fs
+      .readdirSync("saved_text_intakes")
+      .filter((file) => file.endsWith(".txt"))
+      .sort()
+      .reverse();
 
-        const voiceSubmissions = audioFiles.map(audioFile => {
-            const stamp = audioFile.replace("voice-note-", "").replace(".webm", "");
+    const voiceSubmissions = audioFiles.map((audioFile) => {
+      const stamp = audioFile.replace("voice-note-", "").replace(".webm", "");
 
-            return {
-                type: "voice",
-                audioFile,
-                transcriptFile: transcriptFiles.find(t => t.includes(stamp.substring(0, 16))) || "",
-                analysisFile: analysisFiles.find(a => a.includes(stamp.substring(0, 16))) || "",
-            };
-        });
+      return {
+        type: "voice",
+        audioFile,
+        transcriptFile:
+          transcriptFiles.find((t) => t.includes(stamp.substring(0, 16))) || "",
+        analysisFile:
+          analysisFiles.find((a) => a.includes(stamp.substring(0, 16))) || "",
+      };
+    });
 
-        const textSubmissions = textFiles.map(textFile => {
-            const stamp = textFile.replace("text-intake-", "").replace(".txt", "");
+    const textSubmissions = textFiles.map((textFile) => {
+      const stamp = textFile.replace("text-intake-", "").replace(".txt", "");
 
-            return {
-                type: "text",
-                audioFile: "",
-                transcriptFile: textFile,
-                analysisFile: analysisFiles.find(a => a.includes(stamp.substring(0, 16))) || "",
-            };
-        });
+      return {
+        type: "text",
+        audioFile: "",
+        transcriptFile: textFile,
+        analysisFile:
+          analysisFiles.find((a) => a.includes(stamp.substring(0, 16))) || "",
+      };
+    });
 
-        res.json({ submissions: [...voiceSubmissions, ...textSubmissions] });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Could not load submissions" });
-    }
+    res.json({ submissions: [...voiceSubmissions, ...textSubmissions] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not load submissions" });
+  }
 });
 
 app.get("/api/admin/patient-intakes", requireAdmin, async (req, res) => {
-    try {
-        const result = await pool.query(
-            `
+  try {
+    const result = await pool.query(
+      `
       SELECT
         id,
         created_at,
@@ -1266,64 +1255,63 @@ app.get("/api/admin/patient-intakes", requireAdmin, async (req, res) => {
       FROM patient_intakes
       ORDER BY created_at DESC
       LIMIT 100
-      `
-        );
+      `,
+    );
 
-        res.json({
-            success: true,
-            intakes: result.rows,
-        });
-    } catch (err) {
-        console.error("Patient intake list error:", err);
+    res.json({
+      success: true,
+      intakes: result.rows,
+    });
+  } catch (err) {
+    console.error("Patient intake list error:", err);
 
-        res.status(500).json({
-            success: false,
-            error: "Could not load patient intakes",
-            details: err.message,
-        });
-    }
+    res.status(500).json({
+      success: false,
+      error: "Could not load patient intakes",
+      details: err.message,
+    });
+  }
 });
 
 app.get("/api/admin/audio/:filename", requireAdmin, (req, res) => {
-    const filename = path.basename(req.params.filename);
-    const filePath = path.join("saved_voice_notes", filename);
+  const filename = path.basename(req.params.filename);
+  const filePath = path.join("saved_voice_notes", filename);
 
-    if (!fs.existsSync(filePath)) return res.status(404).send("Audio not found");
+  if (!fs.existsSync(filePath)) return res.status(404).send("Audio not found");
 
-    res.setHeader("Content-Type", "audio/webm");
-    res.sendFile(path.resolve(filePath));
+  res.setHeader("Content-Type", "audio/webm");
+  res.sendFile(path.resolve(filePath));
 });
 
 app.get("/api/admin/transcript/:filename", requireAdmin, (req, res) => {
-    const filename = path.basename(req.params.filename);
+  const filename = path.basename(req.params.filename);
 
-    const voiceTranscriptPath = path.join("saved_transcripts", filename);
-    const textIntakePath = path.join("saved_text_intakes", filename);
+  const voiceTranscriptPath = path.join("saved_transcripts", filename);
+  const textIntakePath = path.join("saved_text_intakes", filename);
 
-    let filePath = "";
+  let filePath = "";
 
-    if (fs.existsSync(voiceTranscriptPath)) filePath = voiceTranscriptPath;
-    else if (fs.existsSync(textIntakePath)) filePath = textIntakePath;
-    else return res.status(404).send("Transcript not found");
+  if (fs.existsSync(voiceTranscriptPath)) filePath = voiceTranscriptPath;
+  else if (fs.existsSync(textIntakePath)) filePath = textIntakePath;
+  else return res.status(404).send("Transcript not found");
 
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.sendFile(path.resolve(filePath));
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.sendFile(path.resolve(filePath));
 });
 
 app.get("/api/admin/analysis/:filename", requireAdmin, (req, res) => {
-    const filename = path.basename(req.params.filename);
-    const filePath = path.join("saved_analysis", filename);
+  const filename = path.basename(req.params.filename);
+  const filePath = path.join("saved_analysis", filename);
 
-    if (!fs.existsSync(filePath)) return res.status(404).send("Analysis not found");
+  if (!fs.existsSync(filePath))
+    return res.status(404).send("Analysis not found");
 
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.sendFile(path.resolve(filePath));
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.sendFile(path.resolve(filePath));
 });
 app.get("/api/pilot-dashboard", async (req, res) => {
-
-    try {
-
-        const result = await pool.query(`
+  try {
+    const result = await pool.query(`
 
       SELECT
 
@@ -1418,57 +1406,47 @@ raw_text
 
     `);
 
-        res.json({
+    res.json({
+      success: true,
 
-            success: true,
+      intakes: result.rows,
+    });
+  } catch (err) {
+    console.error("Pilot dashboard error:", err);
 
-            intakes: result.rows
+    res.status(500).json({
+      success: false,
 
-        });
-
-    } catch (err) {
-
-        console.error("Pilot dashboard error:", err);
-
-        res.status(500).json({
-
-            success: false,
-
-            error: "Could not load dashboard"
-
-        });
-
-    }
-
+      error: "Could not load dashboard",
+    });
+  }
 });
 app.get("/api/pilot-audio/:filename", (req, res) => {
+  const filename = path.basename(req.params.filename);
 
-    const filename = path.basename(req.params.filename);
+  const filePath = path.join("saved_voice_notes", filename);
 
-    const filePath = path.join("saved_voice_notes", filename);
+  if (!fs.existsSync(filePath)) return res.status(404).send("Audio not found");
 
-    if (!fs.existsSync(filePath)) return res.status(404).send("Audio not found");
+  res.setHeader("Content-Type", "audio/webm");
 
-    res.setHeader("Content-Type", "audio/webm");
-
-    res.sendFile(path.resolve(filePath));
-
+  res.sendFile(path.resolve(filePath));
 });
 
 app.put("/api/intakes/:id/workflow", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const {
-            status,
-            case_priority,
-            assigned_to,
-            next_action,
-            reviewer_notes,
-            reviewed_by
-        } = req.body;
+  try {
+    const { id } = req.params;
+    const {
+      status,
+      case_priority,
+      assigned_to,
+      next_action,
+      reviewer_notes,
+      reviewed_by,
+    } = req.body;
 
-        const result = await pool.query(
-            `
+    const result = await pool.query(
+      `
       UPDATE patient_intakes
       SET
         status = COALESCE($1, status),
@@ -1484,22 +1462,30 @@ app.put("/api/intakes/:id/workflow", async (req, res) => {
       WHERE id = $7
       RETURNING *
       `,
-            [status, case_priority, assigned_to, next_action, reviewer_notes, reviewed_by, id]
-        );
+      [
+        status,
+        case_priority,
+        assigned_to,
+        next_action,
+        reviewer_notes,
+        reviewed_by,
+        id,
+      ],
+    );
 
-        res.json({ success: true, intake: result.rows[0] });
-    } catch (err) {
-        console.error("Workflow update error:", err);
-        res.status(500).json({ success: false, error: "Workflow update failed" });
-    }
+    res.json({ success: true, intake: result.rows[0] });
+  } catch (err) {
+    console.error("Workflow update error:", err);
+    res.status(500).json({ success: false, error: "Workflow update failed" });
+  }
 });
 app.put("/api/intakes/:id/transfer", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { transferred_to, transfer_reason, reviewer_notes } = req.body;
+  try {
+    const { id } = req.params;
+    const { transferred_to, transfer_reason, reviewer_notes } = req.body;
 
-        const result = await pool.query(
-            `
+    const result = await pool.query(
+      `
       UPDATE patient_intakes
       SET
         transferred_to = $1,
@@ -1511,22 +1497,22 @@ app.put("/api/intakes/:id/transfer", async (req, res) => {
       WHERE id = $4
       RETURNING *
       `,
-            [transferred_to, transfer_reason, reviewer_notes, id]
-        );
+      [transferred_to, transfer_reason, reviewer_notes, id],
+    );
 
-        res.json({ success: true, intake: result.rows[0] });
-    } catch (err) {
-        console.error("Transfer error:", err);
-        res.status(500).json({ success: false, error: "Transfer failed" });
-    }
+    res.json({ success: true, intake: result.rows[0] });
+  } catch (err) {
+    console.error("Transfer error:", err);
+    res.status(500).json({ success: false, error: "Transfer failed" });
+  }
 });
 app.put("/api/intakes/:id/reviewed", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { reviewed_by } = req.body;
+  try {
+    const { id } = req.params;
+    const { reviewed_by } = req.body;
 
-        const result = await pool.query(
-            `
+    const result = await pool.query(
+      `
       UPDATE patient_intakes
       SET
         status = 'under_review',
@@ -1536,24 +1522,21 @@ app.put("/api/intakes/:id/reviewed", async (req, res) => {
       WHERE id = $2
       RETURNING *
       `,
-            [reviewed_by || "Reviewer", id]
-        );
+      [reviewed_by || "Reviewer", id],
+    );
 
-        res.json({ success: true, intake: result.rows[0] });
-    } catch (err) {
-        console.error("Reviewed update error:", err);
-        res.status(500).json({ success: false, error: "Reviewed update failed" });
-    }
+    res.json({ success: true, intake: result.rows[0] });
+  } catch (err) {
+    console.error("Reviewed update error:", err);
+    res.status(500).json({ success: false, error: "Reviewed update failed" });
+  }
 });
 app.put("/api/intakes/:id/delete", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-    try {
-
-        const { id } = req.params;
-
-        const result = await pool.query(
-
-            `
+    const result = await pool.query(
+      `
 
             UPDATE patient_intakes
 
@@ -1565,36 +1548,25 @@ app.put("/api/intakes/:id/delete", async (req, res) => {
 
             `,
 
-            [id]
+      [id],
+    );
 
-        );
+    res.json({
+      success: true,
 
-        res.json({
+      intake: result.rows[0],
+    });
+  } catch (err) {
+    console.error("Delete error:", err);
 
-            success: true,
+    res.status(500).json({
+      success: false,
 
-            intake: result.rows[0]
-
-        });
-
-    } catch (err) {
-
-        console.error("Delete error:", err);
-
-        res.status(500).json({
-
-            success: false,
-
-            error: "Delete failed"
-
-        });
-
-    }
-
+      error: "Delete failed",
+    });
+  }
 });
 
 app.listen(3001, "0.0.0.0", () => {
-
-    console.log("WannaTalk running at http://0.0.0.0:3001");
-
+  console.log("WannaTalk running at http://0.0.0.0:3001");
 });
